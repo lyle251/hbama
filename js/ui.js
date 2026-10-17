@@ -86,7 +86,7 @@ window.Trunk = window.Trunk || {};
   };
 
   /* ---------- router ---------- */
-  const PUBLIC = ['landing', 'login', 'verify', 'demo'];
+  const PUBLIC = ['landing', 'login', 'verify', 'demo', 'track'];
   T.parse = function () {
     const parts = (location.hash.replace(/^#\/?/, '') || 'landing').split('/');
     return { name: parts[0] || 'landing', args: parts.slice(1).map(decodeURIComponent) };

@@ -319,7 +319,7 @@ input[type=radio]:checked::after { content: ""; width: 8px; height: 8px; border-
 
 /* Map */
 .mapbox { border: var(--outline); border-radius: 8px; background: var(--red-100); overflow: hidden; position: relative; box-shadow: var(--shadow-btn); }
-.mapbox svg { display: block; width: 100%; height: auto; }
+.mapbox > svg { display: block; width: 100%; height: auto; }
 .pin { cursor: pointer; }
 .pin:hover .pin-body, .pin:focus-visible .pin-body { transform: translateY(-4px); }
 .pin-body { transition: transform 120ms; }
