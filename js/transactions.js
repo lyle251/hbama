@@ -41,6 +41,32 @@ window.Trunk = window.Trunk || {};
     },
   };
 
+
+  /* Vouch outcomes after a review of `uid` (the vouchee). Stake is returned with a bonus after 5 good sales,
+     and partly forfeited on a 1-2 star review within the first 5 transactions. */
+  T.applyVouchOutcome = function (uid, stars) {
+    const st = T.state, out = [];
+    st.vouches.filter((v) => v.to === uid && v.status === 'ACTIVE').forEach((v) => {
+      v.tx = (v.tx || 0) + 1;
+      const voucher = T.user(v.from);
+      if (stars <= 2) {
+        const lost = Math.ceil(v.stake / 2);
+        v.status = 'FORFEITED'; voucher.credits += v.stake - lost;
+        st.ledger.push({ uid: v.from, delta: v.stake - lost, why: `Vouch for ${T.user(uid).name} went badly: ${lost} of ${v.stake} staked credits lost`, at: 'now' });
+        out.push(`${voucher.name} lost ${lost} staked credits.`);
+      } else {
+        v.good = (v.good || 0) + (stars >= 4 ? 1 : 0);
+        if (v.good >= 5) {
+          v.status = 'REPAID'; const bonus = 10;
+          voucher.credits += v.stake + bonus;
+          st.ledger.push({ uid: v.from, delta: v.stake + bonus, why: `Vouch for ${T.user(uid).name} paid off: stake back plus ${bonus}`, at: 'now' });
+          out.push(`${voucher.name} got the stake back plus ${bonus}.`);
+        }
+      }
+    });
+    return out;
+  };
+
   /* Trust Score 0-100 with a transparent breakdown. */
   T.trust = function (uid) {
     const u = T.user(uid), st = T.state;
