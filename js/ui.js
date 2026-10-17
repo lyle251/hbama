@@ -14,7 +14,7 @@ window.Trunk = window.Trunk || {};
     return `<span class="avatar ${cls}" title="${T.esc(u.name)}">${u.photo ? `<img src="${u.photo}" alt="" style="width:100%;height:100%;object-fit:cover">` : T.esc(T.initials(u.name))}</span>`;
   };
   T.seg = (n, total = 10, warn = false) =>
-    `<div class="seg ${warn ? 'warn' : ''}" role="img" aria-label="${n} of ${total}">${Array.from({ length: total }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div>`;
+    `<div class="seg ${warn === 'ok' ? 'ok' : warn ? 'warn' : ''}" role="img" aria-label="${n} of ${total}">${Array.from({ length: total }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div>`;
   T.chip = (status) => ({
     AVAILABLE: '<span class="chip">○ AVAILABLE</span>',
     NEGOTIATING: '<span class="chip chip--soft">… NEGOTIATING</span>',
@@ -45,7 +45,7 @@ window.Trunk = window.Trunk || {};
     setTimeout(() => n.remove(), 3200);
   };
   /** opts: {title, kind:'info'|'error', body (html), buttons:[{label, cls, run}]}. Esc closes. */
-  T.dialog = function ({ title = 'System Information', kind = 'info', body = '', buttons }) {
+  T.dialog = function ({ title = 'Done', kind = 'info', body = '', buttons }) {
     const ov = document.createElement('div');
     ov.className = 'overlay';
     const icon = kind === 'error' ? '<div class="dlg-err" aria-hidden="true">×</div>' : `<div class="ico">${T.ellieHead(56)}</div>`;
@@ -72,7 +72,7 @@ window.Trunk = window.Trunk || {};
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const box = document.createElement('div');
     box.className = 'confetti'; box.setAttribute('aria-hidden', 'true');
-    const bits = ['🥜', '♥', '✦', '🥜', '♥'];
+    const bits = ['♥', '✦', '♥'];
     for (let i = 0; i < 36; i++) {
       const b = document.createElement('i');
       b.textContent = bits[i % bits.length];
@@ -81,8 +81,7 @@ window.Trunk = window.Trunk || {};
       box.appendChild(b);
     }
     document.body.appendChild(box);
-    document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 320);
-    setTimeout(() => box.remove(), 3400);
+        setTimeout(() => box.remove(), 3400);
   };
 
   /* ---------- router ---------- */
@@ -108,29 +107,29 @@ window.Trunk = window.Trunk || {};
       const on = a.dataset.nav === name || (a.dataset.nav === 'market' && name === 'listing');
       if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
-    T.$('#tray-credits').textContent = '🥜 ' + T.me().credits;
-    document.title = 'Trunk OS';
+    T.$('#tray-credits').textContent = T.me().credits + ' credits';
+    T.$('#school-chip').textContent = T.school(T.state.school).short + ' · ' + T.school(T.state.school).city;
+    T.$('#acct').textContent = T.initials(T.me().name);
+    document.title = 'Trunk';
     if (scr.mount) scr.mount(stage, args);
     window.scrollTo(0, 0);
     closeStart();
   };
 
   /* ---------- shell ---------- */
-  const NAV = [
-    ['market', 'Market', 'market'], ['kit', 'My Semester Kit', 'kit'], ['sell', 'Sell Item', 'sell'],
-    ['chats', 'Messenger', 'chats'], ['hub', 'Campus Hub', 'hub'], ['explore', 'Cross-Campus Explorer', 'globe'], ['sold', 'Recycle Bin (Sold)', 'bin'],
-  ];
+  const NAV = [['market', 'Market'], ['kit', 'Semester Kit'], ['sell', 'Sell'], ['chats', 'Messages'], ['hub', 'Campus Hub'], ['explore', 'Other campuses']];
   const TABS = [['market', 'Market', 'market'], ['kit', 'Kit', 'kit'], ['sell', 'Sell', 'sell'], ['chats', 'Chats', 'chats'], ['hub', 'Hub', 'hub'], ['profile', 'Profile', 'profile']];
 
-  function closeStart() { const m = T.$('.startmenu'); if (m) m.remove(); }
+  function closeStart() { const m = T.$('.startmenu'); if (m) m.remove(); const b = T.$('#acct'); if (b) b.setAttribute('aria-expanded', 'false'); }
   function toggleStart() {
     if (T.$('.startmenu')) return closeStart();
     const m = document.createElement('div');
     m.className = 'startmenu'; m.setAttribute('role', 'menu');
-    m.innerHTML = [['desktop', 'Desktop', 'market'], ['profile', 'My Profile', 'profile'], ['live', 'Meetup Live', 'pin'], ['campus', 'Choose campus', 'globe'], ['demo', 'Demo controls', 'gear'], ['admin', 'Add a school', 'gear']]
-      .map(([r, l, i]) => `<a href="#/${r}" role="menuitem">${l}</a>`).join('')
-      + '<hr><button type="button" data-act="theme">🌙 Night Shift</button><button type="button" data-act="logout">⏻ Log out</button>';
+    m.innerHTML = [['desktop', 'Home'], ['profile', 'My profile'], ['sold', 'My sales'], ['live', 'Meetup Live'], ['campus', 'Choose campus'], ['demo', 'Demo controls'], ['admin', 'Add a school']]
+      .map(([r, l]) => `<a href="#/${r}" role="menuitem">${l}</a>`).join('')
+      + '<hr><button type="button" data-act="theme">Dark mode</button><button type="button" data-act="logout">Log out</button>';
     document.body.appendChild(m);
+    const b = T.$('#acct'); if (b) b.setAttribute('aria-expanded', 'true');
   }
 
   T.boot = function () {
@@ -138,17 +137,15 @@ window.Trunk = window.Trunk || {};
     document.documentElement.dataset.theme = T.state.theme || '';
     if (!T.state.theme) delete document.documentElement.dataset.theme;
     T.$('#app').innerHTML = `
-      <svg class="swoosh" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="2"><path d="M-20 520 Q300 380 520 470 T1020 300"/><path d="M-20 550 Q300 410 520 500 T1020 340"/><path d="M-20 580 Q300 440 520 530 T1020 380"/><path d="M-20 610 Q300 470 520 560 T1020 420"/></g></svg>
-      <nav class="desk-icons" aria-label="Desktop">${NAV.map(([r, l, i]) => `<a class="desk-icon" href="#/${r}" data-nav="${r}">${T.icon(i)}<span>${l}</span></a>`).join('')}</nav>
+      <header class="topbar">
+        <a class="brand" href="#/desktop" aria-label="Trunk home">${T.ellieHead(34)}<span>Trunk</span></a>
+        <nav class="topnav" aria-label="Main">${NAV.map(([r, l]) => `<a href="#/${r}" data-nav="${r}">${l}</a>`).join('')}</nav>
+        <div class="topright"><span class="chip chip--soft hide-sm only-in" id="school-chip"></span><span class="chip chip--ver only-in" id="tray-credits" title="Your credits">0 credits</span>
+          <button type="button" class="iconbtn" data-act="theme" aria-label="Toggle dark mode">☾</button>
+          <button type="button" class="iconbtn only-in" id="acct" data-act="start" aria-haspopup="menu" aria-expanded="false" aria-label="Account menu">${T.initials(T.state.name || 'T')}</button></div>
+      </header>
       <main id="stage" class="stage"></main>
-      <footer class="taskbar">
-        <button type="button" class="btn start" data-act="start" aria-haspopup="menu">Start 🐘</button>
-        <div class="task-win" id="task-win"></div>
-        <div class="tray"><span id="tray-credits" title="Your credits">🥜 0</span><button type="button" class="btn btn--sm" data-act="theme" aria-label="Toggle Night Shift">☾</button><span id="clock" class="px"></span></div>
-      </footer>
       <nav class="tabbar" aria-label="Main">${TABS.map(([r, l, i]) => `<a href="#/${r}" data-nav="${r}">${T.icon(i)}<span>${l}</span></a>`).join('')}</nav>`;
-    const tick = () => { const d = new Date(); T.$('#clock').textContent = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); };
-    tick(); setInterval(tick, 30000);
 
     document.addEventListener('click', (e) => {
       const a = e.target.closest('[data-act]');

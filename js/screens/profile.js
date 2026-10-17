@@ -18,10 +18,10 @@
     return `<div class="row" style="align-items:flex-start;gap:24px"><div class="mon"><span class="ear l"></span><span class="ear r"></span>${T.avatar(uid)}</div>
       <div class="stack" style="flex:1;min-width:220px"><h2>${T.esc(u.name)}</h2>
         <div class="row"><span class="chip chip--soft">${T.esc(sch.name)}</span>${u.verified ? T.verifiedChip : '<span class="chip">unverified</span>'}${T.vouchBadge(uid)}</div>
-        <div class="row" style="gap:20px"><span class="px" style="font-size:22px">${u.ratings ? '★ ' + u.rating.toFixed(1) : 'No ratings yet'} <span class="muted">(${u.ratings})</span></span><span class="px" style="font-size:22px">🥜 ${u.credits} credits</span><span class="px" style="font-size:22px">${v} vouch${v === 1 ? '' : 'es'}</span></div>
+        <div class="row" style="gap:20px"><span class="px" style="font-size:22px">${u.ratings ? '★ ' + u.rating.toFixed(1) : 'No ratings yet'} <span class="muted">(${u.ratings})</span></span><span class="px" style="font-size:22px">${u.credits} credits</span><span class="px" style="font-size:22px">${v} vouch${v === 1 ? '' : 'es'}</span></div>
         ${own(uid) ? '<div class="row"><button class="btn btn--sm" data-act="editProfile">Edit profile</button></div>' : `<div class="row"><a class="btn btn--sm" href="#/market">See listings</a>${vouchButton(uid)}</div>`}</div></div>
       <div class="grid2" style="margin-top:18px"><div class="panel stack sm"><h3 class="px">Trust Score ${t.total}/100</h3>${T.seg(Math.round(t.total / 10), 10)}${T.trustMeter(uid)}</div>
-        <div class="panel stack sm"><h3 class="px">Storage: Credits / Rating / Vouches</h3>
+        <div class="panel stack sm"><h3 class="px">Reputation at a glance</h3>
           <div class="meter-row"><span>Credits</span>${T.seg(Math.min(10, Math.round(u.credits / 20)), 10)}<span class="num">${u.credits}</span></div>
           <div class="meter-row"><span>Rating</span>${T.seg(Math.round(u.rating * 2), 10)}<span class="num">${u.rating.toFixed(1)}</span></div>
           <div class="meter-row"><span>Vouches</span>${T.seg(Math.min(10, v * 3), 10)}<span class="num">${v}</span></div></div></div>
@@ -61,7 +61,7 @@
     render([uid, tab]) {
       uid = uid || T.state.uid; tab = TABS.some((t) => t[0] === tab) ? tab : 'general';
       const u = T.user(uid), body = { general, selling, buying, reviews, vouches }[tab](uid);
-      return T.win({ title: `${T.esc(u.name.split(' ')[0])}'s Profile.cfg`, tone: 'focus', flush: true,
+      return T.win({ title: T.esc(u.name), tone: 'focus', flush: true,
         body: `<div class="tabs" role="tablist">${TABS.map(([k, l]) => `<a class="tab" role="tab" href="#/profile/${uid}/${k}" aria-selected="${k === tab}" style="text-decoration:none;color:inherit">${l}</a>`).join('')}</div><div style="padding:18px">${body}</div>`,
         status: `<span>Trust ${T.trust(uid).total}/100</span><span>${own(uid) ? 'Your profile' : 'Public view'}${T.state.uid !== 'me' ? ' · acting as ' + T.esc(T.me().name) : ''}</span>` });
     },
@@ -71,7 +71,7 @@
   Object.assign(T.acts, {
     editProfile: () => {
       const u = T.me();
-      T.dialog({ title: 'Edit_Profile.exe', body: `<b class="px" style="font-size:21px">Edit profile</b>
+      T.dialog({ title: 'Edit profile', body: `<b class="px" style="font-size:21px">Edit profile</b>
         <label class="field"><span class="px">Full name</span><input class="input" id="ep-name" value="${T.esc(u.name)}"></label>
         <label class="field"><span class="px">Profile picture</span><input class="input" id="ep-photo" type="file" accept="image/*"><span class="hint">Cropped to a square and framed with elephant ears.</span></label>
         <label class="field"><span class="px">Close friends (comma separated)</span><input class="input" id="ep-friends" value="${T.esc(T.state.friends.join(', '))}"></label>`,
@@ -90,9 +90,9 @@
     },
     vouch: (el) => {
       const to = el.dataset.to, me = T.me(), why = canVouch(T.state.uid), target = T.user(to);
-      if (why) return T.dialog({ title: 'NULL PEANUT ERROR', kind: 'error', body: `<b class="px" style="font-size:21px">You can't vouch yet.</b><span>${T.esc(why)}</span>` });
+      if (why) return T.dialog({ title: 'Please check this', kind: 'error', body: `<b class="px" style="font-size:21px">You can't vouch yet.</b><span>${T.esc(why)}</span>` });
       const max = Math.min(40, me.credits);
-      T.dialog({ title: 'Vouch.exe', body: `<b class="px" style="font-size:21px">Vouch for ${T.esc(target.name)}</b><span>You stake credits on them. They get a <b>Vouched by ${T.esc(me.name.split(' ')[0])} ⭐${me.rating.toFixed(1)}</b> badge and a trust boost.</span>
+      T.dialog({ title: 'Vouch', body: `<b class="px" style="font-size:21px">Vouch for ${T.esc(target.name)}</b><span>You stake credits on them. They get a <b>Vouched by ${T.esc(me.name.split(' ')[0])} ⭐${me.rating.toFixed(1)}</b> badge and a trust boost.</span>
         <label class="field"><span class="px">Credits to stake (you have ${me.credits})</span><input class="input" id="v-stake" type="number" min="5" max="${max}" value="${Math.min(20, max)}"></label>
         <span class="hint">Get it all back plus a bonus after 5 good sales. Lose half if they get a 1 to 2 star review or a confirmed report in their first 5.</span>`,
         buttons: [{ label: 'Stake and vouch', cls: 'btn--primary', run: (ov) => {
@@ -106,9 +106,9 @@
     },
     vouchPick: () => {
       const why = canVouch(T.state.uid);
-      if (why) return T.dialog({ title: 'NULL PEANUT ERROR', kind: 'error', body: `<b class="px" style="font-size:21px">You can't vouch yet.</b><span>${T.esc(why)}</span>` });
+      if (why) return T.dialog({ title: 'Please check this', kind: 'error', body: `<b class="px" style="font-size:21px">You can't vouch yet.</b><span>${T.esc(why)}</span>` });
       const cands = Object.values(T.state.users).filter((u) => u.id !== T.state.uid && !u.school && u.ratings < 3 && !T.state.vouches.some((v) => v.from === T.state.uid && v.to === u.id && v.status === 'ACTIVE'));
-      T.dialog({ title: 'Vouch.exe', body: `<b class="px" style="font-size:21px">Who are you vouching for?</b><label class="field"><span class="px">Friend</span><select class="input" id="vp">${cands.map((u) => `<option value="${u.id}">${T.esc(u.name)} · ${u.sales} sales</option>`).join('')}</select></label>`,
+      T.dialog({ title: 'Vouch', body: `<b class="px" style="font-size:21px">Who are you vouching for?</b><label class="field"><span class="px">Friend</span><select class="input" id="vp">${cands.map((u) => `<option value="${u.id}">${T.esc(u.name)} · ${u.sales} sales</option>`).join('')}</select></label>`,
         buttons: [{ label: 'Next', cls: 'btn--primary', run: (ov) => { const id = T.$('#vp', ov).value; setTimeout(() => T.acts.vouch({ dataset: { to: id } }), 0); } }, { label: 'Cancel' }] });
     },
   });

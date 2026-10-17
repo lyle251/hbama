@@ -1,4 +1,4 @@
-/* Meetup_Live.exe: opt-in live location window, simulated walk, share link, SOS, check-in.
+/* Meetup Live: opt-in live location window, simulated walk, share link, SOS, check-in.
    Positions live only in memory and are dropped when the meetup ends (see README, privacy). */
 (function (T) {
   let timer = null, walk = null;
@@ -18,7 +18,7 @@
       lid = lid || ids[0];
       const c = lid && s.chats[lid], l = c && T.listing(lid);
       if (!c || !c.meetup) {
-        return T.win({ title: 'Meetup_Live.exe', tone: 'focus', body: `<div class="stack" style="align-items:center;text-align:center;padding:20px 0">${T.ellie({ pose: 'watch', size: 150 })}<h2>No meetup to watch</h2><p>Set a meetup in Messenger. When both of you accept, it shows up here.</p><a class="btn btn--primary" href="#/chats">Open Messenger</a></div>` });
+        return T.win({ title: 'Meetup Live', tone: 'focus', body: `<div class="stack" style="align-items:center;text-align:center;padding:20px 0">${T.ellie({ pose: 'watch', size: 150 })}<h2>No meetup to watch</h2><p>Set a meetup in Messenger. When both of you accept, it shows up here.</p><a class="btn btn--primary" href="#/chats">Open Messenger</a></div>` });
       }
       const m = c.meetup, name = T.user(c.with).name.split(' ')[0], win = s.shareWindow;
       walk = walk && walk.lid === lid ? walk : { lid, t: 0, mins: 12, running: false, dest: { x: m.x, y: m.y }, name, arrived: { me: false, them: false } };
@@ -27,11 +27,11 @@
         : `<div class="panel stack sm"><b class="px" style="font-size:20px">Share live location? (off by default)</b><span class="hint">Pick when sharing starts. Only you, ${T.esc(name)} and friends you invite can see it. It is deleted when the meetup ends.</span>
             <div class="row">${[60, 30, 15].map((n) => `<button class="btn btn--sm" data-act="shareWin" data-n="${n}">${n} min before</button>`).join('')}</div></div>`;
       return T.win({
-        title: 'Meetup_Live.exe', tone: 'focus',
+        title: 'Meetup Live', tone: 'focus',
         body: `<div class="stack"><div class="row between"><div><b class="px" style="font-size:22px">${T.esc(l.title.slice(0, 40))}</b><div class="hint">${T.esc(m.name)} · ${new Date(m.when).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' })} ${m.safe ? '· <b>safe, public spot</b>' : '· public pin'}</div></div>${T.ellie({ pose: 'watch', size: 80 })}</div>
           ${consent}
           <div class="mapbox" id="live-map">${T.campusSVG({ pins: win ? pins(walk) : [], safeOnly: false, path: win ? [[ME_START.x, ME_START.y], [m.x, m.y]] : null })}</div>
-          <div><div class="px" style="font-size:20px" id="live-eta">Estimated time left… ${win ? eta(walk) + ' min' : '—'}</div><div id="live-bar">${T.seg(Math.round(walk.t * 10), 10, true)}</div></div>
+          <div><div class="px" style="font-size:20px" id="live-eta">Arriving in ${win ? eta(walk) + ' min' : '—'}</div><div id="live-bar">${T.seg(Math.round(walk.t * 10), 10, true)}</div></div>
           <div class="row"><button class="btn btn--sm" data-act="simWalk" ${win ? '' : 'disabled'}>▶ Simulate walk</button><button class="btn btn--primary" data-act="arrived" ${win ? '' : 'disabled'}>I've arrived</button><button class="btn" data-act="shareFriends">Share with friends</button><button class="btn btn--sos" data-act="sos">SOS</button>${win ? '<button class="btn btn--sm" data-act="stopShare">Stop sharing</button>' : ''}<button class="btn btn--sm" data-act="checkin">Demo: 15 min after meetup</button></div>
           <div class="hint" id="live-note">${walk.arrived.me ? '✓ You arrived.' : ''}${walk.arrived.them ? ' ✓ ' + T.esc(name) + ' arrived.' : ''}</div></div>`,
         status: `<span>${win ? 'Live location ON' : 'Live location OFF'}</span><span>Deleted when the meetup ends</span>`,
@@ -44,7 +44,7 @@
     const m = T.$('#live-map'); if (!m || !walk) return;
     const c = T.state.chats[walk.lid];
     m.innerHTML = T.campusSVG({ pins: pins(walk), path: [[ME_START.x, ME_START.y], [c.meetup.x, c.meetup.y]] });
-    T.$('#live-eta').textContent = 'Estimated time left… ' + eta(walk) + ' min';
+    T.$('#live-eta').textContent = 'Arriving in ' + eta(walk) + ' min';
     T.$('#live-bar').innerHTML = T.seg(Math.round(walk.t * 10), 10, true);
   }
   function check(w) {
@@ -63,17 +63,17 @@
       const token = Array.from(crypto.getRandomValues(new Uint8Array(9)), (b) => b.toString(36).padStart(2, '0')).join('').slice(0, 14);
       const url = location.href.split('#')[0] + '#/track/' + token;
       T.state.track = { token, lid: walk ? walk.lid : null, at: Date.now() }; T.save();
-      T.dialog({ title: 'Share_Link.exe', body: `<b class="px" style="font-size:21px">Share with close friends</b><span>Read-only link. It shows where you are going and your live position, and expires when the meetup ends.</span>
+      T.dialog({ title: 'Share with friends', body: `<b class="px" style="font-size:21px">Share with close friends</b><span>Read-only link. It shows where you are going and your live position, and expires when the meetup ends.</span>
         <input class="input" id="share-url" readonly value="${T.esc(url)}" aria-label="Share link"><div class="hint">Close friends: ${T.state.friends.map(T.esc).join(', ')}</div>`,
         buttons: [{ label: 'Copy link', cls: 'btn--primary', run: () => { const i = T.$('#share-url'); i.select(); (navigator.clipboard ? navigator.clipboard.writeText(i.value) : Promise.reject()).then(() => T.toast('Link copied.'), () => T.toast('Press Ctrl+C to copy the selected link.')); return false; } }, { label: 'Done' }] });
     },
     checkin: () => {
       let answered = false;
-      const ov = T.dialog({ title: 'Check_In.exe', body: '<b class="px" style="font-size:21px">Are you okay?</b><span>Your meetup ended 15 minutes ago. If you do not answer, we tell your close friends.</span><div class="hint" id="ci-count">Alerting friends in 10 seconds…</div>',
+      const ov = T.dialog({ title: 'Check-in', body: '<b class="px" style="font-size:21px">Are you okay?</b><span>Your meetup ended 15 minutes ago. If you do not answer, we tell your close friends.</span><div class="hint" id="ci-count">Alerting friends in 10 seconds…</div>',
         buttons: [{ label: "I'm okay", cls: 'btn--primary', run: () => { answered = true; T.toast('Glad you are safe. Location data deleted.'); } }] });
       let n = 10; const id = setInterval(() => { n--; const el = T.$('#ci-count'); if (answered || !el) { clearInterval(id); if (!answered && !el) T.toast('Friends alerted: no answer to the check-in.'); return; } if (n <= 0) { clearInterval(id); ov.close(); T.toast('No answer. Friends alerted: ' + T.state.friends.join(', ')); } else el.textContent = `Alerting friends in ${n} seconds…`; }, 1000);
     },
-    sos: () => T.dialog({ title: 'SOS.exe', kind: 'error', body: `<b class="px" style="font-size:21px">Need help right now?</b><span>In the demo this only alerts your close friends. In a real emergency call campus police or 911.</span><div class="stack sm"><div class="panel">Emergency: <b class="num">911</b></div><div class="panel">Campus safety: <b>TODO_VERIFY</b></div></div>`,
+    sos: () => T.dialog({ title: 'SOS', kind: 'error', body: `<b class="px" style="font-size:21px">Need help right now?</b><span>In the demo this only alerts your close friends. In a real emergency call campus police or 911.</span><div class="stack sm"><div class="panel">Emergency: <b class="num">911</b></div><div class="panel">Campus safety: <b>TODO_VERIFY</b></div></div>`,
       buttons: [{ label: 'Alert my close friends', cls: 'btn--sos', run: () => { T.state.sos = true; T.save(); T.toast('Friends alerted with your live location: ' + T.state.friends.join(', ')); } }, { label: 'I am okay' }] }),
   });
 
@@ -82,9 +82,9 @@
     bare: true,
     render([token]) {
       const t = T.state.track, ok = t && t.token === token && t.lid && T.state.chats[t.lid];
-      if (!ok) return `<div style="max-width:560px;margin:40px auto">${T.win({ title: 'Track.exe', kind: 'error', body: `<div class="stack" style="align-items:center;text-align:center">${T.ellie({ pose: 'sleep', size: 120 })}<b class="px" style="font-size:22px">This link expired.</b><p>Tracking links end when the meetup ends.</p></div>` })}</div>`;
+      if (!ok) return `<div style="max-width:560px;margin:40px auto">${T.win({ title: 'Live tracking', kind: 'error', body: `<div class="stack" style="align-items:center;text-align:center">${T.ellie({ pose: 'sleep', size: 120 })}<b class="px" style="font-size:22px">This link expired.</b><p>Tracking links end when the meetup ends.</p></div>` })}</div>`;
       const c = T.state.chats[t.lid], m = c.meetup;
-      return `<div style="max-width:720px;margin:40px auto">${T.win({ title: 'Track.exe · read-only', tone: 'focus', body: `<div class="stack"><b class="px" style="font-size:22px">${T.esc(T.state.name)} is meeting ${T.esc(T.user(c.with).name)}</b><div class="hint">${m ? T.esc(m.name) : 'Meetup'} · read-only view</div><div class="mapbox">${T.campusSVG({ pins: m ? [{ x: m.x, y: m.y, label: 'Meetup', variant: 'bigred' }] : [] })}</div></div>` })}</div>`;
+      return `<div style="max-width:720px;margin:40px auto">${T.win({ title: 'Live tracking (read-only)', tone: 'focus', body: `<div class="stack"><b class="px" style="font-size:22px">${T.esc(T.state.name)} is meeting ${T.esc(T.user(c.with).name)}</b><div class="hint">${m ? T.esc(m.name) : 'Meetup'} · read-only view</div><div class="mapbox">${T.campusSVG({ pins: m ? [{ x: m.x, y: m.y, label: 'Meetup', variant: 'bigred' }] : [] })}</div></div>` })}</div>`;
     },
   };
 })(window.Trunk);

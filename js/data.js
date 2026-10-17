@@ -147,7 +147,7 @@ window.Trunk = window.Trunk || {};
     { id: 'r11', cat: 'Tech & Library', name: 'Library research help', desc: 'Research consultations and course reserve textbooks.', url: 'TODO_VERIFY', phone: 'TODO_VERIFY', hours: [8, 22], tags: ['library', 'textbooks'] },
     { id: 'r12', cat: 'Tech & Library', name: 'IT help desk', desc: 'Wi-Fi, accounts, software and loaner laptops.', url: 'TODO_VERIFY', phone: 'TODO_VERIFY', hours: [8, 18], tags: ['tech'] },
   ];
-  T.RES_CATS = [['Tutoring', '#FF8C99'], ['Writing & Speaking', '#FFB3BC'], ['Engineering', '#E8354A'], ['Health & Wellness', '#FFE1E4'], ['Career', '#FF8C99'], ['Food & Basic Needs', '#FFB3BC'], ['Tech & Library', '#FFE1E4']];
+  T.RES_CATS = [['Tutoring', '#EFCDD1'], ['Writing & Speaking', '#EFCDD1'], ['Engineering', '#EFCDD1'], ['Health & Wellness', '#EFCDD1'], ['Career', '#EFCDD1'], ['Food & Basic Needs', '#EFCDD1'], ['Tech & Library', '#EFCDD1']];
 
   T.SYNONYMS = { calc: 'calculator', calculator: 'calculator', goggles: 'safety glasses', 'safety glasses': 'goggles', text: 'textbook', book: 'textbook', fridge: 'refrigerator', refrigerator: 'fridge', coat: 'lab coat', lamp: 'light' };
 

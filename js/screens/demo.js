@@ -31,8 +31,8 @@
     bare: true,
     render() {
       const s = T.state, users = ['me', 'tom', 'minh', 'priya', 'devon', 'keisha'];
-      return `<div class="logo-mark" aria-label="Trunk">TRUNK</div><div style="max-width:880px;margin:30px auto 0">${T.win({
-        title: 'Demo_Controls.exe', tone: 'focus',
+      return `<div style="max-width:880px;margin:30px auto 0">${T.win({
+        title: 'Demo controls', tone: 'focus',
         body: `<div class="stack"><div class="row between"><div><h2>Judging demo</h2><p class="hint">Mock adapters are on (DEMO_MODE=true). Nothing leaves your browser.</p></div>${T.ellie({ pose: 'phones', size: 110 })}</div>
           <div class="panel stack sm"><b class="px" style="font-size:21px">Act as</b><div class="row">${users.map((u) => `<button class="btn btn--sm ${s.uid === u ? 'btn--primary' : ''}" data-act="demoUser" data-u="${u}">${T.esc(T.user(u).name)}</button>`).join('')}</div><span class="hint">Tom has 8 sales at ⭐4.9. Minh is new with 0 credits. Switch to Tom, open Minh's profile and vouch.</span></div>
           <div class="panel stack sm"><b class="px" style="font-size:21px">Jump to a step</b><ol style="margin:0;padding:0;list-style:none;display:grid;gap:6px">${STEPS.map(([l], i) => `<li class="row between"><span>${i + 1}. ${l}</span><button class="btn btn--sm" data-act="demoStep" data-i="${i}">Go</button></li>`).join('')}</ol></div>
@@ -51,7 +51,7 @@
   T.screens.admin = {
     render() {
       const f = (id, label, val, type = 'text') => `<label class="field"><span class="px">${label}</span><input class="input" id="${id}" type="${type}" value="${T.esc(val)}"></label>`;
-      return T.win({ title: 'New_School.cfg', tone: 'focus',
+      return T.win({ title: 'Add a school', tone: 'focus',
         body: `<form id="school-form" class="stack" novalidate><h2>Add a school</h2><p class="hint">A new tenant needs a name, an email domain, a location and a color. It gets its own market, safe spots and Campus Hub.</p>
           <div class="grid2">${f('ns-name', 'School name', 'Samford University')}${f('ns-slug', 'Slug (URL)', 'samford')}${f('ns-domain', 'Email domain', 'samford.edu')}${f('ns-city', 'City', 'Birmingham')}${f('ns-st', 'State', 'AL')}${f('ns-lat', 'Latitude', '33.464', 'number')}${f('ns-lng', 'Longitude', '-86.79', 'number')}${f('ns-color', 'Primary color', '#B81E33', 'color')}</div>
           <div class="row end"><a class="btn" href="#/demo">Cancel</a><button class="btn btn--primary" type="submit">Create tenant</button></div>
@@ -64,11 +64,11 @@
         const v = (id) => T.$('#' + id, el).value.trim(), slug = v('ns-slug').toLowerCase().replace(/[^a-z0-9-]/g, '');
         const lat = Number(v('ns-lat')), lng = Number(v('ns-lng')), domain = v('ns-domain').toLowerCase();
         const bad = !v('ns-name') || !slug || !/^[a-z0-9.-]+\.edu$/.test(domain) || isNaN(lat) || isNaN(lng) || lat < 24 || lat > 50 || lng < -125 || lng > -66;
-        if (bad) return T.dialog({ title: 'NULL PEANUT ERROR', kind: 'error', body: '<b class="px" style="font-size:21px">Check the form.</b><span>Needs a name, a slug, a .edu domain and a US latitude and longitude.</span>' });
-        if (T.SCHOOLS.some((s) => s.slug === slug)) return T.dialog({ title: 'NULL PEANUT ERROR', kind: 'error', body: '<b class="px" style="font-size:21px">That slug is taken.</b>' });
+        if (bad) return T.dialog({ title: 'Please check this', kind: 'error', body: '<b class="px" style="font-size:21px">Check the form.</b><span>Needs a name, a slug, a .edu domain and a US latitude and longitude.</span>' });
+        if (T.SCHOOLS.some((s) => s.slug === slug)) return T.dialog({ title: 'Please check this', kind: 'error', body: '<b class="px" style="font-size:21px">That slug is taken.</b>' });
         const t = { slug, name: v('ns-name'), short: slug.slice(0, 3).toUpperCase(), city: v('ns-city'), st: v('ns-st'), lat, lng, domains: [domain], primary: v('ns-color'), accessory: 'Cap', logoText: 'TRUNK · ' + v('ns-city').toUpperCase(), vouchMin: 3, live: true };
         (T.state.extraSchools = T.state.extraSchools || []).push(t); T.SCHOOLS.push(t); T.save();
-        T.dialog({ title: 'System Information', body: `<b class="px" style="font-size:21px">${T.esc(t.name)} is live.</b><span>Students with <b>@${T.esc(domain)}</b> can sign up now. It shows on the US map.</span>`, buttons: [{ label: 'See the map', cls: 'btn--primary', run: () => { T.state.chosen = false; T.go('campus'); } }, { label: 'Close' }] });
+        T.dialog({ title: 'Done', body: `<b class="px" style="font-size:21px">${T.esc(t.name)} is live.</b><span>Students with <b>@${T.esc(domain)}</b> can sign up now. It shows on the US map.</span>`, buttons: [{ label: 'See the map', cls: 'btn--primary', run: () => { T.state.chosen = false; T.go('campus'); } }, { label: 'Close' }] });
       });
     },
   };

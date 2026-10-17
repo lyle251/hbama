@@ -37,7 +37,7 @@
           <form class="composer" id="composer"><div class="quick"><button type="button" class="btn btn--sm" data-act="quick" data-t="Is this available?">Is this available?</button><button type="button" class="btn btn--sm" data-act="quick" data-t="Can you do $">Can you do $__?</button><button type="button" class="btn btn--sm" data-act="quick" data-t="Where can we meet?">Where can we meet?</button></div>
           <div class="row" style="flex-wrap:nowrap"><label class="btn btn--sm" style="cursor:pointer" title="Send an image">📎<input type="file" id="c-img" accept="image/*" class="sr"></label><input class="input" id="c-text" placeholder="Type a message…" autocomplete="off" aria-label="Message"><button class="btn btn--primary" type="submit">Send</button></div></form></div>`;
       }
-      return T.win({ title: 'Messenger', tone: 'focus', flush: true, body: `<div class="messenger"><div class="contacts" role="navigation" aria-label="Conversations">${contacts || '<div style="padding:12px" class="hint">No conversations</div>'}</div>${pane}</div>`, status: `<span>${ids.length} conversations</span><span>${c ? c.status.replace('_', ' ') : ''}</span>` });
+      return T.win({ title: 'Messages', tone: 'focus', flush: true, body: `<div class="messenger"><div class="contacts" role="navigation" aria-label="Conversations">${contacts || '<div style="padding:12px" class="hint">No conversations</div>'}</div>${pane}</div>`, status: `<span>${ids.length} conversations</span><span>${c ? c.status.replace('_', ' ') : ''}</span>` });
     },
     mount(el, [lid]) {
       const log = T.$('#chatlog', el); if (log) log.scrollTop = log.scrollHeight;
@@ -59,7 +59,7 @@
       inner = `<dl class="kv"><dt>Where</dt><dd><b>${T.esc(sp)}</b> ${m.safe ? '<span class="chip chip--ver">SAFE SPOT</span>' : '<span class="chip chip--hold">PUBLIC PIN</span>'}</dd><dt>When</dt><dd class="num"><b>${fmt(m.when)}</b></dd><dt>Accepted</dt><dd>${m.acc.me ? '✓ You' : '… You'} · ${m.acc.them ? '✓ ' + T.esc(name) : '… ' + T.esc(name)}</dd></dl>`;
       if (c.status === 'NEGOTIATING') inner += `<div class="row">${!m.acc.me ? `<button class="btn btn--primary btn--sm" data-act="acceptMeetup" data-id="${c.lid}">Accept</button>` : ''}<button class="btn btn--sm" data-act="proposeMeetup" data-id="${c.lid}">Suggest a change</button></div>`;
       if (c.status === 'ON_HOLD') {
-        inner += T.seg(due(c) ? 10 : 6, 10, true) + `<div class="hint">${due(c) ? 'Meetup time reached.' : 'Estimated time left… until the meetup.'}</div><div class="row">
+        inner += T.seg(due(c) ? 10 : 6, 10, true) + `<div class="hint">${due(c) ? 'Meetup time reached.' : 'Time until the meetup.'}</div><div class="row">
           <a class="btn btn--sm btn--primary" href="#/live/${c.lid}">Meetup Live</a>
           ${due(c) ? `<button class="btn btn--sm btn--ok" data-act="confirmSale" data-id="${c.lid}" ${c.confirm.me ? 'disabled' : ''}>${c.confirm.me ? '✓ Waiting for ' + T.esc(name) : 'Confirm successful purchase'}</button>` : `<button class="btn btn--sm" data-act="fastForward" data-id="${c.lid}">Demo: jump to meetup time</button>`}
           <button class="btn btn--sm" data-act="cancelMeetup" data-id="${c.lid}">Cancel</button>${due(c) ? `<button class="btn btn--sm" data-act="noShow" data-id="${c.lid}">No-show</button>` : ''}</div>
@@ -68,7 +68,7 @@
       if (c.status === 'SOLD') inner += '<b class="px" style="font-size:22px;color:var(--red-700)">SOLD ✓ +10 credits each</b>';
     }
     if (!inner) return '';
-    return `<div class="minwin" style="max-width:420px;align-self:center;width:100%"><header><span>Meetup.card</span>${T.chip(c.status)}</header><div class="stack sm">${inner}</div></div>`;
+    return `<div class="minwin" style="max-width:420px;align-self:center;width:100%"><header><span>Meetup</span>${T.chip(c.status)}</header><div class="stack sm">${inner}</div></div>`;
   }
 
   /* ---------- meetup proposal dialog with map picker ---------- */
@@ -86,7 +86,7 @@
     const d = new Date(Date.now() + 3600e3); d.setMinutes(Math.ceil(d.getMinutes() / 15) * 15, 0, 0);
     const iso = new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 16);
     T.pick = { spot: 'libsteps', pin: null };
-    const ov = T.dialog({ title: asThem ? 'Meetup.card' : 'Propose_Meetup.exe', body: `<b class="px" style="font-size:21px">${asThem ? T.esc(T.user(c.with).name.split(' ')[0]) + ' proposes' : 'Propose'} a meetup</b>
+    const ov = T.dialog({ title: asThem ? 'Meetup' : 'Propose a meetup', body: `<b class="px" style="font-size:21px">${asThem ? T.esc(T.user(c.with).name.split(' ')[0]) + ' proposes' : 'Propose'} a meetup</b>
       <label class="field"><span class="px">Date and time</span><input class="input" type="datetime-local" id="mt-when" value="${iso}"></label>
       <div><span class="px" style="font-size:19px">Place: <b id="pick-name">${T.spot('libsteps').name}</b></span><div class="hint">Tap a safe spot, or tap anywhere on the map to drop a pin inside campus.</div></div>
       <div class="mapbox" id="pick-map">${mapHTML()}</div>`,
@@ -123,7 +123,7 @@
     const name = T.user(c.with).name.split(' ')[0];
     let stars = 5;
     const tags = ['on time', 'as described', 'friendly', 'late', 'not as described'];
-    T.dialog({ title: 'Rate.exe', body: `<b class="px" style="font-size:21px">How was ${T.esc(name)}?</b>
+    T.dialog({ title: 'Rate this exchange', body: `<b class="px" style="font-size:21px">How was ${T.esc(name)}?</b>
       <div class="row" role="radiogroup" aria-label="Stars">${[1, 2, 3, 4, 5].map((n) => `<label class="chip" style="cursor:pointer;font-size:18px"><input type="radio" name="st" value="${n}" ${n === 5 ? 'checked' : ''} style="width:14px;height:14px"> ${n}★</label>`).join('')}</div>
       <div class="row">${tags.map((t) => `<label class="check chip"><input type="checkbox" data-tag="${t}" style="width:14px;height:14px"> ${t}</label>`).join('')}</div>
       <label class="field"><span class="px">Public comment (shows on ${T.esc(name)}'s profile)</span><textarea class="input" id="rv-text" placeholder="Quick handoff, as described."></textarea></label>`,

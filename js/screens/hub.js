@@ -10,7 +10,7 @@
   }
   function cards() {
     const rs = list();
-    if (!rs.length) return `<div class="stack" style="align-items:center;padding:18px;text-align:center">${T.ellie({ pose: 'sign', size: 120 })}<b class="px" style="font-size:22px">NULL PEANUT ERROR</b><p>No resources match. Clear the filters.</p></div>`;
+    if (!rs.length) return `<div class="stack" style="align-items:center;padding:18px;text-align:center">${T.ellie({ pose: 'sign', size: 120 })}<b class="px" style="font-size:22px">Please check this</b><p>No resources match. Clear the filters.</p></div>`;
     return rs.map((r) => `<article class="panel stack sm" style="margin-bottom:10px"><div class="row between"><h3 class="px" style="font-size:22px">${T.esc(r.name)}</h3><button class="btn btn--sm" data-act="favRes" data-id="${r.id}" aria-pressed="${!!(T.state.favRes || {})[r.id]}" aria-label="Favorite ${T.esc(r.name)}">${(T.state.favRes || {})[r.id] ? '♥' : '♡'}</button></div>
       <div class="row" style="gap:4px"><span class="chip chip--soft">${T.esc(r.cat)}</span>${openNow(r) ? '<span class="chip chip--ver">OPEN NOW</span>' : '<span class="chip">closed</span>'}${verified(r) ? '<span class="chip chip--ver">VERIFIED ✓</span>' : '<span class="chip chip--hold">⚠ needs verification</span>'}</div>
       <p>${T.esc(r.desc)}</p>
@@ -30,7 +30,7 @@
       const folders = T.RES_CATS.map(([n, col]) => `<button class="folder" data-act="hubCat" data-cat="${T.esc(n)}" aria-pressed="${T.hub.cat === n}" style="${T.hub.cat === n ? 'background:var(--red-100)' : ''}">${T.folder(col)}<span>${T.esc(n)}</span></button>`).join('');
       return T.win({
         title: 'Campus Hub', tone: 'focus', flush: true,
-        menu: `<span class="px">Search</span><span class="grow"><label class="sr" for="hub-q">Search resources</label><input class="input" id="hub-q" type="search" placeholder="tutoring, writing, food…" value="${T.esc(T.hub.q)}" style="min-height:34px;padding:4px 8px"></span><label class="check"><input type="checkbox" id="hub-fav" ${T.hub.fav ? 'checked' : ''}> Favorites</label><button class="btn btn--sm btn--primary" data-act="hubQuiz">Which resource do I need?</button>`,
+        menu: `<span class="px">Search</span><span class="grow"><label class="sr" for="hub-q">Search resources</label><input class="input" id="hub-q" type="search" placeholder="tutoring, writing, food…" value="${T.esc(T.hub.q)}" ></span><label class="check"><input type="checkbox" id="hub-fav" ${T.hub.fav ? 'checked' : ''}> Favorites</label><button class="btn btn--sm btn--primary" data-act="hubQuiz">Which resource do I need?</button>`,
         body: `<div style="padding:16px"><div class="hint" style="margin-bottom:8px">${T.esc(T.school(T.state.school).name)} · all official resources in one place. ${T.hub.cat ? '<a href="#/hub/all">Show all folders</a>' : ''}</div>
           <div class="row" style="gap:4px;align-items:flex-start;justify-content:flex-start">${folders}</div><div id="hub-list" style="margin-top:12px"></div></div>`,
         status: `<span id="hub-count"></span><span>Contact info is TODO_VERIFY until an admin confirms it</span>`,
@@ -52,7 +52,7 @@
       const ans = []; let i = 0;
       const show = () => {
         const [q, opts] = Q[i];
-        const ov = T.dialog({ title: `Quiz.exe · ${i + 1} of 3`, body: `<b class="px" style="font-size:21px">${q}</b><div class="stack sm" role="radiogroup">${opts.map(([v, l], k) => `<label class="check"><input type="radio" name="qz" value="${v}" ${k === 0 ? 'checked' : ''}> ${l}</label>`).join('')}</div>`,
+        const ov = T.dialog({ title: `Quiz · ${i + 1} of 3`, body: `<b class="px" style="font-size:21px">${q}</b><div class="stack sm" role="radiogroup">${opts.map(([v, l], k) => `<label class="check"><input type="radio" name="qz" value="${v}" ${k === 0 ? 'checked' : ''}> ${l}</label>`).join('')}</div>`,
           buttons: [{ label: i < 2 ? 'Next' : 'Show my match', cls: 'btn--primary', run: (o) => { ans.push(T.$('input[name=qz]:checked', o).value); i++; if (i < 3) setTimeout(show, 0); else setTimeout(result, 0); } }, { label: 'Cancel' }] });
         return ov;
       };
@@ -60,7 +60,7 @@
         const [a, b, c] = ans;
         const id = a === 'write' ? 'r4' : a === 'stress' ? 'r7' : a === 'career' ? 'r9' : a === 'basic' ? 'r10' : b === 'eng' ? 'r6' : c === 'group' ? 'r2' : 'r1';
         const r = T.RESOURCES.find((x) => x.id === id);
-        T.dialog({ title: 'System Information', body: `<b class="px" style="font-size:21px">Try: ${T.esc(r.name)}</b><span>${T.esc(r.desc)}</span>${a === 'class' ? '<span class="hint">Student tutors on Trunk can fill the gaps between sessions.</span>' : ''}`,
+        T.dialog({ title: 'Done', body: `<b class="px" style="font-size:21px">Try: ${T.esc(r.name)}</b><span>${T.esc(r.desc)}</span>${a === 'class' ? '<span class="hint">Student tutors on Trunk can fill the gaps between sessions.</span>' : ''}`,
           buttons: [{ label: 'Open it', cls: 'btn--primary', run: () => { T.hub.cat = r.cat; T.hub.q = ''; T.go('hub'); T.render(); } }, { label: 'Close' }] });
       };
       show();

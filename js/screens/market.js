@@ -1,4 +1,4 @@
-/* Market.exe: smart search, category tree, filters, cross-campus browsing. */
+/* Market: smart search, category tree, filters, cross-campus browsing. */
 (function (T) {
   T.mk = { q: '', cats: [], courses: [], max: '', cond: '', spot: '', ver: false, cross: false };
   const COURSE_RE = /^\s*([a-z]{2,4})[\s-]?(\d{3})\s*$/i;
@@ -79,16 +79,16 @@
     let html = '';
     if (r.mode === 'none') {
       html = `<div class="stack" style="align-items:center;text-align:center;padding:20px 0">${T.ellie({ pose: 'sign', size: 150, label: 'Ellie holding a sign' })}
-        <b class="px" style="font-size:24px">NULL PEANUT ERROR</b><p>No results for '${T.esc(T.mk.q)}'.${r.suggest ? ` Try <a href="#" data-act="mkTry" data-q="${r.suggest}"><b>${r.suggest}</b></a>?` : ' Try a course code like CS 100.'}</p>
+        <b class="px" style="font-size:24px">Please check this</b><p>No results for '${T.esc(T.mk.q)}'.${r.suggest ? ` Try <a href="#" data-act="mkTry" data-q="${r.suggest}"><b>${r.suggest}</b></a>?` : ' Try a course code like CS 100.'}</p>
         <button class="btn btn--primary" data-act="mkWanted">Post a Wanted request</button></div>`;
     } else {
       if (r.mode === 'course') html += `<div class="panel row between" style="margin-bottom:14px"><div><b class="px" style="font-size:22px">${r.course.code} · ${T.esc(r.course.name)}</b><div class="hint">Everything sellers tagged with this course, ${r.course.next} students take it next term.</div></div><a class="btn btn--sm" href="#/hub/${encodeURIComponent('Tutoring')}">Need help with ${r.course.code}? → Tutoring</a></div>`;
       r.sections.forEach((s) => {
         if (!s.items.length) return;
-        html += `${s.h ? `<h3 class="px" style="font-size:22px;margin:14px 0 8px">📁 ${s.h} <span class="muted">(${s.items.length})</span></h3>` : ''}<div class="filegrid">${s.items.map(T.fileCard).join('')}</div>`;
+        html += `${s.h ? `<h3 class="px" style="font-size:22px;margin:14px 0 8px">${s.h} <span class="muted">(${s.items.length})</span></h3>` : ''}<div class="filegrid">${s.items.map(T.fileCard).join('')}</div>`;
       });
       if (r.mode === 'course' && !r.sections.length) html += '<p class="muted">No sellers tagged this course yet. Post a Wanted request and classmates will see it.</p>';
-      if (r.wanted && r.wanted.length) html += `<h3 class="px" style="font-size:22px;margin:18px 0 8px">🔎 Wanted for ${r.course.code}</h3>${r.wanted.map((w) => `<div class="panel row between" style="margin-bottom:8px"><span>${T.avatar(w.uid)} <b>${T.esc(w.title)}</b> <span class="muted">up to $${w.max}</span></span><a class="btn btn--sm" href="#/sell">I have this</a></div>`).join('')}`;
+      if (r.wanted && r.wanted.length) html += `<h3 class="px" style="font-size:22px;margin:18px 0 8px">Wanted for ${r.course.code}</h3>${r.wanted.map((w) => `<div class="panel row between" style="margin-bottom:8px"><span>${T.avatar(w.uid)} <b>${T.esc(w.title)}</b> <span class="muted">up to $${w.max}</span></span><a class="btn btn--sm" href="#/sell">I have this</a></div>`).join('')}`;
       if (r.mode === 'course') html += `<div class="row end" style="margin-top:14px"><button class="btn btn--sm" data-act="mkWanted">Post a Wanted request</button></div>`;
     }
     return html;
@@ -116,7 +116,7 @@
       const kids = k === 'CLASS' ? `<ul>${T.COURSES.map((c) => `<li><label class="check"><input type="checkbox" data-mk="course" value="${c.code}" ${m.courses.includes(c.code) ? 'checked' : ''}> ${c.code}</label></li>`).join('')}</ul>` : '';
       return `<li><label class="check"><span class="box" style="width:auto">${k === 'CLASS' ? '[–]' : '[+]'}</span><input type="checkbox" data-mk="cat" value="${k}" ${m.cats.includes(k) ? 'checked' : ''}> ${v} <span class="cnt muted">${cnt(k)}</span></label>${kids}</li>`;
     }).join('');
-    return `<details id="mk-filters" open><summary class="px" style="font-size:20px;cursor:pointer">Filters</summary><ul class="tree" aria-label="Categories">${cats}</ul><hr style="border:0;border-top:2px dashed var(--ink-soft);margin:12px 0">
+    return `<details id="mk-filters" open><summary class="px" style="font-size:20px;cursor:pointer">Filters</summary><ul class="tree" aria-label="Categories">${cats}</ul><hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
       <div class="stack sm">
         <label class="field"><span class="px">Max price</span><input class="input" id="mk-max" type="number" min="0" placeholder="$ any" value="${m.max}"></label>
         <label class="field"><span class="px">Condition</span><select class="input" id="mk-cond"><option value="">Any</option>${T.CONDS.map((c) => `<option ${m.cond === c ? 'selected' : ''}>${c}</option>`).join('')}</select></label>
@@ -129,8 +129,8 @@
   T.screens.market = {
     render() {
       return T.win({
-        title: T.mk.cross ? 'Cross-Campus Explorer.exe' : 'Market.exe', flush: true,
-        menu: `<a href="#/sell">File</a><a href="#/kit">Kit</a><span class="grow pathfield" style="position:relative"><label class="sr" for="mk-q">Search</label><input class="input" id="mk-q" type="search" autocomplete="off" placeholder="Search course or item… (try CS 100, calc, goggles)" value="${T.esc(T.mk.q)}" style="min-height:34px;padding:4px 8px;font-family:var(--font-body)"><div id="mk-sug" class="panel" hidden style="position:absolute;left:0;right:0;top:100%;z-index:20;padding:4px;margin-top:4px"></div></span><a href="#/sell" class="btn btn--sm btn--primary">+ Sell</a>`,
+        title: T.mk.cross ? 'Other campuses' : 'Market', flush: true,
+        menu: `<span class="grow pathfield" style="position:relative"><label class="sr" for="mk-q">Search</label><input class="input" id="mk-q" type="search" autocomplete="off" placeholder="Search course or item… (try CS 100, calc, goggles)" value="${T.esc(T.mk.q)}" ><div id="mk-sug" class="panel" hidden style="position:absolute;left:0;right:0;top:100%;z-index:20;padding:4px;margin-top:4px"></div></span><a href="#/sell" class="btn btn--sm btn--primary">+ Sell</a>`,
         body: `<div class="market"><aside id="mk-side">${sidebar()}</aside><section><div id="mk-results"></div></section></div>`,
         status: '<span id="mk-status"></span>',
       }).replace('<footer class="statusbar"><span id="mk-status"></span></footer>', '<footer class="statusbar" id="mk-status"></footer>');
@@ -169,7 +169,7 @@
   T.wantedDialog = function (prefill = '', course = '') {
     const code = normCourse(prefill) || course;
     T.dialog({
-      title: 'Wanted.req', body: `<b class="px" style="font-size:21px">Post a Wanted request</b>
+      title: 'Wanted request', body: `<b class="px" style="font-size:21px">Post a Wanted request</b>
         <label class="field"><span class="px">What do you need?</span><input class="input" id="w-title" value="${T.esc(code ? code + ' textbook' : prefill)}"></label>
         <label class="field"><span class="px">Course (optional)</span><input class="input" id="w-course" value="${T.esc(code || '')}" placeholder="ECE 380"></label>
         <label class="field"><span class="px">Max price</span><input class="input" id="w-max" type="number" value="40"></label>`,

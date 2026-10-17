@@ -1,6 +1,6 @@
-# Trunk OS
+# Trunk
 
-Trunk is a multi-tenant campus marketplace for textbooks, dorm gear, lab supplies, tickets, tutoring and rides. It starts at the University of Alabama (Tuscaloosa) and is built so a new school can be added in under a minute. The interface is a retro red-and-white desktop with an elephant mascot, Ellie, following `UI.md`.
+Trunk is a multi-tenant campus marketplace for textbooks, dorm gear, lab supplies, tickets, tutoring and rides. It starts at the University of Alabama (Tuscaloosa) and is built so a new school can be added in under a minute. The interface is a calm, muted red-and-white web app with an elephant mascot, Ellie. It keeps the red and white identity from `UI.md` but uses a normal app layout (top navigation, cards, one rounded typeface, soft shadows) so it is easy on the eyes.
 
 This repository is a **working front-end prototype** of the product brief. It is plain HTML, CSS and JavaScript with no build step and no API keys. All data lives in the browser (`localStorage`) and every external service sits behind a mock adapter.
 
@@ -82,4 +82,4 @@ The brief asks for Next.js 15, Prisma and Auth.js. This prototype defines the sc
 
 ## Design and legal
 
-Follows `UI.md` (red and white palette, hard offset shadows, window chrome, Ellie variants). Ellie is original artwork. No University of Alabama logos, mascots or fonts are used; building names on the map are generic and fictional.
+Keeps the `UI.md` identity (red and white, Ellie variants) in a softer web-app treatment: muted crimson on warm neutrals, Nunito throughout, hairline borders and soft shadows, light and dark themes. Ellie is original artwork. No University of Alabama logos, mascots or fonts are used; building names on the map are generic and fictional.

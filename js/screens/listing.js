@@ -29,7 +29,7 @@
   T.screens.listing = {
     render([id]) {
       const l = T.listing(id);
-      if (!l) return T.win({ title: 'PEANUT_NOT_FOUND.exe', body: '<p>That listing is gone. <a href="#/market">Back to Market</a></p>' });
+      if (!l) return T.win({ title: 'Not found', body: '<p>That listing is gone. <a href="#/market">Back to Market</a></p>' });
       const u = T.user(l.seller), mine = l.seller === T.state.uid, away = l.school !== T.state.school;
       const extra = [
         l.event && `<dt>Event</dt><dd>${T.esc(l.event)} · ${T.esc(l.date)} · ${T.esc(l.seat)}</dd>`,
@@ -54,7 +54,7 @@
           <div class="row">${mine ? `<a class="btn" href="#/chats">See messages</a>` : l.status === 'SOLD' ? '' : `<button class="btn btn--primary" data-act="msgSeller" data-id="${l.id}">Message seller</button>`}
             <button class="btn" data-act="fav" data-id="${l.id}" aria-pressed="${!!fav}">${fav ? '♥ Saved' : '♡ Save'}</button><a class="btn" href="#/market">Back</a></div>
         </div></div>`;
-      return T.win({ title: `${T.esc(l.id)}_${T.esc(l.title.slice(0, 22))}.file`, body, tone: 'focus', status: `<span>${T.CATS[l.cat]}</span><span>${T.school(l.school).name}</span>` });
+      return T.win({ title: 'Listing details', body, tone: 'focus', status: `<span>${T.CATS[l.cat]}</span><span>${T.school(l.school).name}</span>` });
     },
   };
   Object.assign(T.acts, {
