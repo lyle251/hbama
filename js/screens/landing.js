@@ -55,9 +55,4 @@
       }, 420);
     },
   };
-  T.screens.desktop = {
-    render() {
-      return T.win({ title: 'Desktop.sys', body: `<div class="stack"><h2>Hi ${T.esc(T.state.name.split(' ')[0])}.</h2><p>Pick an icon on the left to open a window.</p>${T.ellie({ pose: 'wave', size: 140 })}</div>` });
-    },
-  };
 })(window.Trunk);

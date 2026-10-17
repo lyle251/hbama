@@ -64,7 +64,7 @@ window.Trunk = window.Trunk || {};
       bar.appendChild(el);
     });
     document.body.appendChild(ov);
-    (T.$('input,select,textarea', ov) || T.$('.btn--primary,.btn', bar)).focus();
+    const first = T.$('input,select,textarea', ov) || T.$('.btn--primary,.btn', bar); if (first) first.focus();
     ov.close = close;
     return ov;
   };
