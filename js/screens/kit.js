@@ -81,7 +81,7 @@
         body: `<div class="grid2" style="margin-bottom:16px"><div class="panel stack sm"><b class="px" style="font-size:22px">Cost comparison</b>
             <div class="meter-row"><span>New</span>${T.seg(10, 10)}<span class="num">$${newTotal}</span></div>
             <div class="meter-row"><span>On Trunk</span>${T.seg(Math.max(1, Math.round((trunkTotal / Math.max(1, newTotal)) * 10)), 10, 'ok')}<span class="num">$${trunkTotal}</span></div>
-            <b class="px" style="font-size:24px;color:var(--red-700)">You save $${save}</b></div>
+            <b class="px" style="font-size:24px;color:var(--brand-700)">You save $${save}</b></div>
           <div class="panel row">${T.ellie({ pose: 'wave', size: 90 })}<div><b class="px" style="font-size:20px">${haveCount} of ${items} already owned</b><div class="hint">Tick "Already have it" and the total updates.</div></div></div></div>${sections}`,
         status: `<span>${myCourses().length} courses · ${items} items</span><span>Prices from ${T.school(s.school).short} sellers</span>`,
       });

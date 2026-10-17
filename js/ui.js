@@ -97,7 +97,6 @@ window.Trunk = window.Trunk || {};
     const st = T.state;
     if (!T.screens[name]) name = 'desktop';
     if (!st.signedIn && !PUBLIC.includes(name)) { name = 'landing'; args = []; }
-    if (st.signedIn && !st.chosen && !PUBLIC.includes(name) && name !== 'campus' && name !== 'admin') { name = 'campus'; args = []; }
     const scr = T.screens[name];
     const app = T.$('#app');
     const stage = T.$('#stage');
@@ -107,7 +106,7 @@ window.Trunk = window.Trunk || {};
       const on = a.dataset.nav === name || (a.dataset.nav === 'market' && name === 'listing');
       if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
-    T.$('#tray-credits').textContent = T.me().credits + ' credits';
+    T.$('#tray-credits b').textContent = T.me().credits;
     T.$('#school-chip').textContent = T.school(T.state.school).short + ' · ' + T.school(T.state.school).city;
     T.$('#acct').textContent = T.initials(T.me().name);
     document.title = 'Trunk';
@@ -125,9 +124,9 @@ window.Trunk = window.Trunk || {};
     if (T.$('.startmenu')) return closeStart();
     const m = document.createElement('div');
     m.className = 'startmenu'; m.setAttribute('role', 'menu');
-    m.innerHTML = [['desktop', 'Home'], ['profile', 'My profile'], ['sold', 'My sales'], ['live', 'Meetup Live'], ['campus', 'Choose campus'], ['demo', 'Demo controls'], ['admin', 'Add a school']]
+    m.innerHTML = [['desktop', 'Home'], ['profile', 'My profile'], ['sold', 'My sales'], ['live', 'Pickup map'], ['demo', 'Demo controls'], ['admin', 'Add a school']]
       .map(([r, l]) => `<a href="#/${r}" role="menuitem">${l}</a>`).join('')
-      + '<hr><button type="button" data-act="theme">Dark mode</button><button type="button" data-act="logout">Log out</button>';
+      + '<hr><button type="button" data-act="theme">Switch day / night</button><button type="button" data-act="logout">Log out</button>';
     document.body.appendChild(m);
     const b = T.$('#acct'); if (b) b.setAttribute('aria-expanded', 'true');
   }
@@ -137,14 +136,16 @@ window.Trunk = window.Trunk || {};
     document.documentElement.dataset.theme = T.state.theme || '';
     if (!T.state.theme) delete document.documentElement.dataset.theme;
     T.$('#app').innerHTML = `
+      <div class="sky" aria-hidden="true"><i class="cloud c1"></i><i class="cloud c2"></i><i class="cloud c3"></i><i class="stars"></i></div>
       <header class="topbar">
-        <a class="brand" href="#/desktop" aria-label="Trunk home">${T.ellieHead(34)}<span>Trunk</span></a>
+        <a class="brand" href="#/desktop" aria-label="Trunk home">${T.ellieHead(34)}<span>TRUNK</span></a>
         <nav class="topnav" aria-label="Main">${NAV.map(([r, l]) => `<a href="#/${r}" data-nav="${r}">${l}</a>`).join('')}</nav>
-        <div class="topright"><span class="chip chip--soft hide-sm only-in" id="school-chip"></span><span class="chip chip--ver only-in" id="tray-credits" title="Your credits">0 credits</span>
-          <button type="button" class="iconbtn" data-act="theme" aria-label="Toggle dark mode">☾</button>
+        <div class="topright"><span class="chip chip--soft hide-sm only-in" id="school-chip"></span><span class="coins only-in" id="tray-credits" title="Your emeralds (credits)">${T.emerald(16)}<b>0</b></span>
+          <button type="button" class="iconbtn" data-act="theme" aria-label="Switch day or night">☾</button>
           <button type="button" class="iconbtn only-in" id="acct" data-act="start" aria-haspopup="menu" aria-expanded="false" aria-label="Account menu">${T.initials(T.state.name || 'T')}</button></div>
       </header>
       <main id="stage" class="stage"></main>
+      <button type="button" class="fab" data-act="assist" aria-label="Ask Ellie, the shopping assistant">${T.ellieHead(34)}<span>ASK ELLIE</span></button>
       <nav class="tabbar" aria-label="Main">${TABS.map(([r, l, i]) => `<a href="#/${r}" data-nav="${r}">${T.icon(i)}<span>${l}</span></a>`).join('')}</nav>`;
 
     document.addEventListener('click', (e) => {
@@ -169,6 +170,6 @@ window.Trunk = window.Trunk || {};
       document.documentElement.dataset.theme = next; T.state.theme = next; T.save();
       closeStart();
     },
-    logout: () => { T.state.signedIn = false; T.state.chosen = false; T.save(); closeStart(); T.go('landing'); },
+    logout: () => { T.state.signedIn = false; T.save(); closeStart(); T.go('landing'); },
   });
 })(window.Trunk);

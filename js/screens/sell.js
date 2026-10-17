@@ -74,7 +74,7 @@
         const d = read(form), err = validate(d);
         T.$$('.err', el).forEach((n) => { n.textContent = ''; n.style.color = ''; });
         const keys = Object.keys(err);
-        keys.forEach((k) => { const n = T.$('#e-' + k, el); if (n) { n.textContent = err[k]; n.style.color = 'var(--red-700)'; n.style.fontWeight = '700'; } });
+        keys.forEach((k) => { const n = T.$('#e-' + k, el); if (n) { n.textContent = err[k]; n.style.color = 'var(--brand-700)'; n.style.fontWeight = '700'; } });
         if (keys.length) { const f = T.$('#' + (keys[0] === 'cat' ? 'e-cat' : 's-' + keys[0]), el); if (f && f.focus) f.focus(); return T.dialog({ title: 'Please check this', kind: 'error', body: `<b class="px" style="font-size:21px">Almost there.</b><span>${T.esc(err[keys[0]])}</span>` }); }
         const code = T.normCourse(d.course || '');
         const l = { id: 'N' + T.state.nextId++, cat: d.cat, title: d.title.trim(), price: Number(d.price), cond: d.cond, seller: T.state.uid, spot: d.spots[0] || 'libsteps', status: 'AVAILABLE', school: T.state.school, cross: !!d.cross, desc: d.desc, trade: !!d.trade, posted: Date.now(), isbn: d.isbn || '' };

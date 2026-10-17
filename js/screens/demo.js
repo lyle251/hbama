@@ -14,7 +14,7 @@
   }
   const STEPS = [
     ['Sign up with a .edu email', () => { T.mode = 'signup'; T.go('login'); }],
-    ['Choose UA on the US map', () => { quickIn(); T.state.chosen = false; T.go('campus'); }],
+    ['School detected from the email', () => { T.mode = 'signup'; T.go('login'); }],
     ['Sync classes from myBama', () => { quickIn(); T.go('desktop'); setTimeout(() => T.acts.connectBama(), 60); }],
     ['Open the Semester Kit', () => { quickIn(); T.state.synced = true; T.save(); T.go('kit'); }],
     ['Search "CS 100"', () => { quickIn(); T.mk.q = 'CS 100'; T.mk.cross = false; T.go('market'); }],
@@ -68,7 +68,7 @@
         if (T.SCHOOLS.some((s) => s.slug === slug)) return T.dialog({ title: 'Please check this', kind: 'error', body: '<b class="px" style="font-size:21px">That slug is taken.</b>' });
         const t = { slug, name: v('ns-name'), short: slug.slice(0, 3).toUpperCase(), city: v('ns-city'), st: v('ns-st'), lat, lng, domains: [domain], primary: v('ns-color'), accessory: 'Cap', logoText: 'TRUNK · ' + v('ns-city').toUpperCase(), vouchMin: 3, live: true };
         (T.state.extraSchools = T.state.extraSchools || []).push(t); T.SCHOOLS.push(t); T.save();
-        T.dialog({ title: 'Done', body: `<b class="px" style="font-size:21px">${T.esc(t.name)} is live.</b><span>Students with <b>@${T.esc(domain)}</b> can sign up now. It shows on the US map.</span>`, buttons: [{ label: 'See the map', cls: 'btn--primary', run: () => { T.state.chosen = false; T.go('campus'); } }, { label: 'Close' }] });
+        T.dialog({ title: 'Done', body: `<b class="px" style="font-size:21px">${T.esc(t.name)} is live.</b><span>Students with <b>@${T.esc(domain)}</b> can sign up now. Their market is ready.</span>`, buttons: [{ label: 'Done', cls: 'btn--primary' }] });
       });
     },
   };

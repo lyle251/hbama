@@ -36,6 +36,59 @@ window.Trunk = window.Trunk || {};
     } },
   };
 
+  /* Shopping assistant. Real: Gemma through the Google AI API, called from the SERVER so the key never reaches the browser.
+     Contract: ask(text) resolves to {text, cards:[{kind:'material'|'listing'|'resource', ...}], chips:[string]}. */
+  const assistant = {
+    mock: {
+      async ask(q) {
+        await wait(650);
+        const saved = T.mk; T.mk = { q: '', cats: [], courses: [], max: '', cond: '', spot: '', ver: false, cross: false };
+        try { return answer(String(q)); } finally { T.mk = saved; }
+      },
+    },
+    real: { async ask() {
+      // TODO: POST /api/assistant { text }. Server: model "gemma-3-27b-it" via
+      //   https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent  (x-goog-api-key: GEMMA_API_KEY)
+      // Give the model tool results as context: course materials, active listings (seller, price, spot), Campus Hub resources.
+      // Ask for JSON in the contract shape, validate it with Zod, and never invent links or prices that are not in the context.
+      throw new Error('GEMMA_API_KEY missing, using the mock assistant');
+    } },
+  };
+  const walk = (l) => T.walkMin(l.spot);
+  function sellersFor(m, code) {
+    return T.state.listings.filter((l) => l.school === T.state.school && (l.status === 'AVAILABLE' || l.status === 'NEGOTIATING') && (l.mat === m.key || (m.isbn && l.isbn === m.isbn)))
+      .sort((a, b) => a.price - b.price).map((l) => ({ id: l.id, title: l.title, price: l.price, seller: T.user(l.seller).name, rating: T.user(l.seller).rating, walk: walk(l), spot: T.spot(l.spot).name, safe: T.spot(l.spot).safe }));
+  }
+  function answer(q) {
+    const codes = [];
+    q.replace(/\b([a-z]{2,4})[\s-]?(\d{3})\b/gi, (m, a, b) => { const c = `${a.toUpperCase()} ${b}`; if (T.course(c) && !codes.includes(c)) codes.push(c); return m; });
+    const lc = q.toLowerCase();
+    if (codes.length) {
+      const cards = []; let total = 0, saveTo = 0, lines = [];
+      codes.forEach((code) => {
+        const c = T.course(code);
+        c.mats.forEach((m) => {
+          const sellers = sellersFor(m, code); total += m.newPrice; saveTo += sellers.length ? sellers[0].price : m.newPrice;
+          cards.push({ kind: 'material', course: code, name: m.name, type: T.MAT_TYPES[m.type], edition: m.edition || '', isbn: m.isbn || '', newPrice: m.newPrice, src: m.src, sellers });
+        });
+        lines.push(`${code} (${c.name}) needs ${c.mats.length} things`);
+      });
+      const hub = lc.match(/tutor|help|study/) ? [{ kind: 'resource', name: 'Engineering tutoring and lab help', cat: 'Engineering' }] : [];
+      return { text: `${lines.join('. ')}. Buying new costs about $${total}. Buying from students on campus can cost about $${saveTo}, so you could save about $${Math.max(0, total - saveTo)}. Here is each item with the sellers on your campus.`, cards: [...cards, ...hub], chips: ['Who sells the cheapest calculator?', 'Where can I get tutoring?'] };
+    }
+    if (/tutor|study|help|stuck|struggl/.test(lc)) {
+      const res = T.RESOURCES.filter((r) => r.cat === 'Tutoring' || r.cat === 'Engineering').slice(0, 3).map((r) => ({ kind: 'resource', name: r.name, cat: r.cat, desc: r.desc }));
+      const tut = T.state.listings.filter((l) => l.cat === 'TUTOR' && l.school === T.state.school && l.status !== 'SOLD').map((l) => ({ kind: 'listing', id: l.id, title: l.title, price: l.price, seller: T.user(l.seller).name, walk: walk(l), spot: T.spot(l.spot).name }));
+      return { text: 'Here are the official tutoring resources, plus students on Trunk who tutor.', cards: [...res, ...tut], chips: ['What do I need for ECE 380?'] };
+    }
+    const r = T.search(q);
+    if (r.mode !== 'none' && r.sections[0] && r.sections[0].items.length) {
+      const items = r.sections[0].items.slice(0, 4).map((l) => ({ kind: 'listing', id: l.id, title: l.title, price: l.price, seller: T.user(l.seller).name, walk: walk(l), spot: T.spot(l.spot).name }));
+      return { text: `I found ${r.sections[0].items.length} match${r.sections[0].items.length === 1 ? '' : 'es'}. Cheapest and closest are first.`, cards: items.sort((a, b) => a.price - b.price), chips: ['What do I need for CS 100?'] };
+    }
+    return { text: 'I can list what a class needs and who sells it. Try a course code like ECE 380, or an item like a calculator or lab coat.', cards: [], chips: ['What do I need for ECE 380?', 'Find a calculator', 'Where can I get tutoring?'] };
+  }
+
   const verification = {
     mock: { async verify(id) { await wait(400); return /^1\d{7}$/.test(id); } },
     real: { async verify() { /* TODO: SheerID verification request with the student's ID and document upload. */ throw new Error('Not configured'); } },
@@ -49,5 +102,5 @@ window.Trunk = window.Trunk || {};
     real: { async put() { /* TODO: presigned S3 PUT, return the object URL. */ throw new Error('Not configured'); } },
   };
   const pick = (a) => (T.DEMO_MODE ? a.mock : a.real);
-  T.adapters = { registrar: pick(registrar), ai: pick(ai), verification: pick(verification), realtime: pick(realtime), storage: pick(storage) };
+  T.adapters = { registrar: pick(registrar), ai: pick(ai), verification: pick(verification), realtime: pick(realtime), assistant: pick(assistant), storage: pick(storage) };
 })(window.Trunk);

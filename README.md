@@ -1,6 +1,6 @@
 # Trunk
 
-Trunk is a multi-tenant campus marketplace for textbooks, dorm gear, lab supplies, tickets, tutoring and rides. It starts at the University of Alabama (Tuscaloosa) and is built so a new school can be added in under a minute. The interface is a calm, muted red-and-white web app with an elephant mascot, Ellie. It keeps the red and white identity from `UI.md` but uses a normal app layout (top navigation, cards, one rounded typeface, soft shadows) so it is easy on the eyes.
+Trunk is a multi-tenant campus marketplace for textbooks, dorm gear, lab supplies, tickets, tutoring and rides. It starts at the University of Alabama (Tuscaloosa) and is built so a new school can be added in under a minute. The interface is a block-world theme: stone inventory panels with bevels, a dirt-and-grass top bar, pixel type (Press Start 2P for headings, Jersey 15 for text), a day sky and a night sky, and Ellie the elephant. No red.
 
 This repository is a **working front-end prototype** of the product brief. It is plain HTML, CSS and JavaScript with no build step and no API keys. All data lives in the browser (`localStorage`) and every external service sits behind a mock adapter.
 
@@ -17,15 +17,15 @@ Open `http://localhost:8080`, then go to `#/demo` for the judging script (switch
 
 | Area | Screen | Notes |
 |---|---|---|
-| Landing, sign up, log in | `#/landing`, `#/login`, `#/verify` | `.edu` domain must match a tenant, 6-digit email code (shown in a dev toast), mock student-ID check, "request my school" flow |
-| Choose a campus | `#/campus` | US map with elephant pins, animated zoom into the campus map with safe meetup spots and live listing counts |
+| Landing, sign up, log in | `#/landing`, `#/login`, `#/verify` | Your school is detected from the `.edu` domain (`@crimson.ua.edu` is the University of Alabama), 6-digit email code (shown in a dev toast), mock student-ID check, "request my school" flow. There is no campus picker. |
 | Market | `#/market`, `#/listing/ID` | Smart search (course codes, ISBN, synonyms, related items), category tree and filters, typeahead, cross-campus mode |
 | Semester Kit | `#/kit` | myBama sync (mock), required items per course, "X sellers, lowest $Y", "Already have it", savings total, ranked matches, Wanted requests, syllabus paste, reverse "sell it" flow |
 | Sell | `#/sell` | Class Materials require a course, category-specific fields, price helper, photos |
 | Messenger | `#/chats` | Per-listing chat, meetup proposal on the campus map, ON HOLD, both confirm, SOLD, credits, ratings and reviews |
-| Meetup Live | `#/live/ID` | Opt-in share window (60, 30 or 15 min), simulated walk, arrival, friend share link, SOS, 15-minute check-in |
+| Pickup map | `#/live/ID` | The only map in the app. It opens when both people accept a meetup, and shows buyer and seller to each other. Opt-in share window (60, 30 or 15 min), simulated walk, arrival, friend share link, SOS, 15-minute check-in |
 | Profile | `#/profile/ID` | One profile for buying and selling, Trust Score breakdown, reviews, credit ledger, vouching |
 | Campus Hub | `#/hub` | Per-tenant resource directory, open-now, favorites, "which resource do I need?" quiz, links to tutoring listings |
+| Ask Ellie | button on every page | Shopping assistant. Ask "what do I need for ECE 380?" and get each item, the price new, and the sellers on your campus with links. Runs on a mock until the Gemma key is added |
 | Admin | `#/admin/schools/new` | Create a tenant from a short config |
 
 ## Innovation highlights
@@ -35,6 +35,7 @@ Open `http://localhost:8080`, then go to `#/demo` for the judging script (switch
 - **Skin-in-the-game vouching.** A trusted seller stakes credits on a newcomer. A good run returns the stake plus a bonus; a bad first review costs the voucher half.
 - **Readable Trust Score.** 0 to 100, with every component shown (verification, rating, sales, credits, vouches weighted by the voucher's own score, account age, no-shows).
 - **Safety built into the transaction.** Opt-in live location only in a window before the meetup, read-only friend links, safe-spot badges, SOS and an automatic check-in.
+- **A shopping assistant.** Ask what a class needs and get the items, new prices and campus sellers in one answer.
 - **Multi-tenant from day one.** Each school is a tenant record with its own domains, theme, spots, categories and resource hub. Students can browse and buy across campuses and choose to ship or meet halfway.
 
 ## How multi-tenancy works
@@ -64,6 +65,7 @@ All integrations live in `js/adapters.js` behind one interface. `DEMO_MODE = tru
 
 | Adapter | Mock today | Real |
 |---|---|---|
+| Assistant | Rule-based answers from Trunk's own listings and course data | Gemma (`gemma-3-27b-it`) through the Google AI API, called from the server so the key stays private; JSON validated with Zod; no invented links or prices |
 | Student verification | Accepts 8-digit IDs starting with 1 | SheerID verification request |
 | Registrar | Returns five seeded UA courses | Banner / myBama SSO and section lookup |
 | Syllabus parsing | Deterministic parser over seeded materials plus ISBN/keyword extraction | Claude API server-side, JSON validated with Zod |
@@ -82,4 +84,4 @@ The brief asks for Next.js 15, Prisma and Auth.js. This prototype defines the sc
 
 ## Design and legal
 
-Keeps the `UI.md` identity (red and white, Ellie variants) in a softer web-app treatment: muted crimson on warm neutrals, Nunito throughout, hairline borders and soft shadows, light and dark themes. Ellie is original artwork. No University of Alabama logos, mascots or fonts are used; building names on the map are generic and fictional.
+Block-world theme with Ellie kept as the mascot (grey body, green cap). Day and night themes follow the system setting, with a toggle in the top bar. Credits are shown as emeralds. Ellie is original artwork. No University of Alabama logos, mascots or fonts are used; building names on the map are generic and fictional.

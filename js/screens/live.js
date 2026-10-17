@@ -18,7 +18,7 @@
       lid = lid || ids[0];
       const c = lid && s.chats[lid], l = c && T.listing(lid);
       if (!c || !c.meetup) {
-        return T.win({ title: 'Meetup Live', tone: 'focus', body: `<div class="stack" style="align-items:center;text-align:center;padding:20px 0">${T.ellie({ pose: 'watch', size: 150 })}<h2>No meetup to watch</h2><p>Set a meetup in Messenger. When both of you accept, it shows up here.</p><a class="btn btn--primary" href="#/chats">Open Messenger</a></div>` });
+        return T.win({ title: 'Pickup map', tone: 'focus', body: `<div class="stack" style="align-items:center;text-align:center;padding:20px 0">${T.ellie({ pose: 'watch', size: 150 })}<h2>No meetup to watch</h2><p>Set a meetup in Messenger. When both of you accept, it shows up here.</p><a class="btn btn--primary" href="#/chats">Open Messenger</a></div>` });
       }
       const m = c.meetup, name = T.user(c.with).name.split(' ')[0], win = s.shareWindow;
       walk = walk && walk.lid === lid ? walk : { lid, t: 0, mins: 12, running: false, dest: { x: m.x, y: m.y }, name, arrived: { me: false, them: false } };
@@ -27,7 +27,7 @@
         : `<div class="panel stack sm"><b class="px" style="font-size:20px">Share live location? (off by default)</b><span class="hint">Pick when sharing starts. Only you, ${T.esc(name)} and friends you invite can see it. It is deleted when the meetup ends.</span>
             <div class="row">${[60, 30, 15].map((n) => `<button class="btn btn--sm" data-act="shareWin" data-n="${n}">${n} min before</button>`).join('')}</div></div>`;
       return T.win({
-        title: 'Meetup Live', tone: 'focus',
+        title: 'Pickup map', tone: 'focus',
         body: `<div class="stack"><div class="row between"><div><b class="px" style="font-size:22px">${T.esc(l.title.slice(0, 40))}</b><div class="hint">${T.esc(m.name)} · ${new Date(m.when).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' })} ${m.safe ? '· <b>safe, public spot</b>' : '· public pin'}</div></div>${T.ellie({ pose: 'watch', size: 80 })}</div>
           ${consent}
           <div class="mapbox" id="live-map">${T.campusSVG({ pins: win ? pins(walk) : [], safeOnly: false, path: win ? [[ME_START.x, ME_START.y], [m.x, m.y]] : null })}</div>

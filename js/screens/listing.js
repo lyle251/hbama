@@ -44,7 +44,7 @@
           <div class="panel"><b class="px" style="font-size:20px">Price helper</b><div>${T.esc(T.priceHint(l))}</div></div></div>
         <div class="stack">
           <div class="row between"><h1 style="font-size:30px">${T.esc(l.title)}</h1></div>
-          <div class="row"><b class="px" style="font-size:34px;color:var(--red-700)">${T.money(l.price)}</b>${T.chip(l.status)}<span class="chip chip--soft">${l.cond}</span>${l.cross ? '<span class="chip">Ships or meets halfway</span>' : ''}</div>
+          <div class="row"><b class="px" style="font-size:34px;color:var(--brand-700)">${T.money(l.price)}</b>${T.chip(l.status)}<span class="chip chip--soft">${l.cond}</span>${l.cross ? '<span class="chip">Ships or meets halfway</span>' : ''}</div>
           <p>${T.esc(l.desc || 'No description.')}</p>
           <dl class="kv"><dt>Category</dt><dd>${T.CATS[l.cat]}</dd>${extra}<dt>Meetup</dt><dd>${T.spot(l.spot).name} ${T.spot(l.spot).safe ? '<span class="chip chip--ver">SAFE SPOT</span>' : ''}</dd><dt>Distance</dt><dd>${T.distance(l)}</dd></dl>
           ${l.course ? `<div class="panel" style="padding:8px 10px">Need help with ${l.course}? <a href="#/hub/Tutoring"><b>Campus Hub → Tutoring</b></a></div>` : ''}

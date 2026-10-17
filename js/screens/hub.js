@@ -27,7 +27,7 @@
   T.screens.hub = {
     render([cat]) {
       if (cat) T.hub.cat = decodeURIComponent(cat) === 'all' ? '' : decodeURIComponent(cat);
-      const folders = T.RES_CATS.map(([n, col]) => `<button class="folder" data-act="hubCat" data-cat="${T.esc(n)}" aria-pressed="${T.hub.cat === n}" style="${T.hub.cat === n ? 'background:var(--red-100)' : ''}">${T.folder(col)}<span>${T.esc(n)}</span></button>`).join('');
+      const folders = T.RES_CATS.map(([n, col]) => `<button class="folder" data-act="hubCat" data-cat="${T.esc(n)}" aria-pressed="${T.hub.cat === n}" style="${T.hub.cat === n ? 'background:var(--brand-100)' : ''}">${T.folder(col)}<span>${T.esc(n)}</span></button>`).join('');
       return T.win({
         title: 'Campus Hub', tone: 'focus', flush: true,
         menu: `<span class="px">Search</span><span class="grow"><label class="sr" for="hub-q">Search resources</label><input class="input" id="hub-q" type="search" placeholder="tutoring, writing, food…" value="${T.esc(T.hub.q)}" ></span><label class="check"><input type="checkbox" id="hub-fav" ${T.hub.fav ? 'checked' : ''}> Favorites</label><button class="btn btn--sm btn--primary" data-act="hubQuiz">Which resource do I need?</button>`,

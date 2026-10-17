@@ -19,13 +19,15 @@
             <button type="button" class="btn btn--sm ${mode === 'login' ? 'btn--primary' : ''}" data-act="authMode" data-mode="login" role="tab" aria-selected="${mode === 'login'}">Log in</button>
           </div>
           ${mode === 'signup' ? '<label class="field"><span class="px">Full name</span><input class="input" id="f-name" autocomplete="name" value="Jordan Lee"></label>' : ''}
-          <label class="field"><span class="px">School email (.edu)</span><input class="input" id="f-email" type="email" autocomplete="email" value="jordan@crimson.ua.edu" inputmode="email"><span class="hint">Try crimson.ua.edu, auburn.edu or gatech.edu. Any other domain shows the request-a-school flow.</span></label>
+          <label class="field"><span class="px">School email (.edu)</span><input class="input" id="f-email" type="email" autocomplete="email" value="jordan@crimson.ua.edu" inputmode="email"><span class="hint" id="detect">Try crimson.ua.edu, auburn.edu or gatech.edu. Your school is detected from your email.</span></label>
           <div class="row end"><button class="btn btn--primary" type="submit">Send my code</button></div>
         </form>`,
         status: '<span>Campus-verified with .edu</span><span>DEMO_MODE=true</span>',
       })}</div>`;
     },
     mount(el) {
+      const detect = () => { const sch = schoolForEmail(T.$('#f-email', el).value.trim()), h = T.$('#detect', el); h.innerHTML = sch ? `School detected: <b>${T.esc(sch.name)}</b> (${T.esc(sch.city)}, ${sch.st})` : 'Your school is detected from your email.'; };
+      T.$('#f-email', el).addEventListener('input', detect); detect();
       T.$('#login-form', el).addEventListener('submit', (e) => {
         e.preventDefault();
         const email = T.$('#f-email', el).value.trim();
@@ -97,64 +99,10 @@
         s.signedIn = true; s.email = a.email; s.name = a.name; s.verified = verified; s.home = a.school; s.school = a.school; s.uid = 'me';
         s.users.me.name = a.name; s.users.me.verified = verified;
         T.save();
-        T.dialog({ title: 'Done', body: '<b class="px" style="font-size:21px">Verified Student ✓</b><span>Your profile is ready. Next, pick your campus.</span>', buttons: [{ label: 'Choose my campus', cls: 'btn--primary', run: () => { T.go('campus'); } }] });
+        s.chosen = true; T.save();
+        T.dialog({ title: 'Welcome', body: `<b class="px" style="font-size:21px">Verified student</b><span>We matched <b>@${T.esc(domainOf(a.email))}</b> to <b>${T.esc(T.school(a.school).name)}</b>. You are in.</span>`, buttons: [{ label: 'Enter the market', cls: 'btn--primary', run: () => { T.go('desktop'); } }] });
       }
     },
   };
 
-  /* ---------- Choose your campus ---------- */
-  function counts(slug) {
-    const c = {};
-    T.state.listings.filter((l) => l.school === slug && l.status !== 'SOLD').forEach((l) => { c[l.spot] = (c[l.spot] || 0) + 1; });
-    return c;
-  }
-  function usMap() {
-    const pins = T.SCHOOLS.map((s) => {
-      const [x, y] = T.project(s.lng, s.lat);
-      return `<g class="pin" role="button" tabindex="0" data-act="pickSchool" data-slug="${s.slug}" aria-label="${T.esc(s.name)}, ${s.city}">
-        <g class="pin-body" transform="translate(${x - 18} ${y - 44})">${T.ellieHead(36)}</g>
-        <text x="${x}" y="${y + 10}" text-anchor="middle" style="font:800 16px Nunito,sans-serif;fill:var(--ink);paint-order:stroke;stroke:#fff;stroke-width:5px">${s.short}</text></g>`;
-    }).join('');
-    return `<svg viewBox="0 0 960 560" role="img" aria-label="Map of the United States with Trunk campuses"><rect width="960" height="560" style="fill:var(--red-100)"/>
-      <g id="mapg" class="zoomable"><path d="${T.usPath}" style="fill:var(--surface);stroke:var(--ink-soft);stroke-width:2;stroke-linejoin:round"/>${pins}</g></svg>`;
-  }
-  T.screens.campus = {
-    render() {
-      const s = T.state;
-      const opts = T.SCHOOLS.map((x) => `<option value="${x.slug}" ${x.slug === s.school ? 'selected' : ''}>${x.name} (${x.city}, ${x.st})</option>`).join('');
-      return T.win({
-        title: 'Choose your campus', tone: 'focus',
-        menu: `<span class="px">Campus</span><label class="grow pathfield"><span class="sr">Search campuses</span><select class="input" id="school-sel" style="font-family:var(--font-pixel);font-size:19px">${'<option value="">Choose a school</option>' + opts}</select></label>`,
-        body: `<div id="campus-body" class="stack"><div class="hint">Click an elephant pin to zoom in. Trunk is live at 3 schools.</div><div class="mapbox" id="mapbox">${usMap()}</div><div id="zoombar" hidden>${T.seg(0, 20)}</div></div>`,
-        status: '<span>3 campuses online</span><span>Request yours: Start → Add a school</span>',
-      });
-    },
-    mount(el) {
-      const sel = T.$('#school-sel', el);
-      sel.addEventListener('change', () => { if (sel.value) pick(sel.value); });
-      T.$$('.pin', el).forEach((p) => p.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); p.dispatchEvent(new Event('click', { bubbles: true })); } }));
-    },
-  };
-  function pick(slug) {
-    const sch = T.school(slug), g = T.$('#mapg');
-    const [px, py] = T.project(sch.lng, sch.lat), k = 7;
-    T.state.school = slug; T.save();
-    const bar = T.$('#zoombar'); bar.hidden = false;
-    g.style.transform = `translate(${480 - k * px}px, ${280 - k * py}px) scale(${k})`;
-    let n = 0;
-    const id = setInterval(() => { n++; bar.innerHTML = T.seg(n, 20); if (n >= 20) { clearInterval(id); showCampus(slug); } }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 5 : 45);
-  }
-  T.acts.pickSchool = (el) => pick(el.dataset.slug);
-  function showCampus(slug) {
-    const sch = T.school(slug), c = counts(slug), total = Object.values(c).reduce((a, b) => a + b, 0);
-    const home = T.state.home === slug;
-    T.$('#campus-body').innerHTML = `<div class="row between"><h2>${T.esc(sch.name)}</h2><span class="chip chip--soft">${sch.city}, ${sch.st}</span></div>
-      <div class="mapbox">${T.campusSVG({ counts: c })}</div>
-      <div class="row between"><span class="hint">Numbered pins show active listings near each meetup spot. Red check pins are lit, public, safe exchange spots.</span>
-      <span class="row"><button class="btn" type="button" data-act="backToUS">Back to US map</button><button class="btn btn--primary" type="button" data-act="enterCampus" data-slug="${slug}">Enter ${sch.short} Market</button></span></div>
-      ${home ? '' : '<div class="chip chip--neg" style="align-self:flex-start">Visiting: you can browse and buy across campuses</div>'}`;
-    T.$('.statusbar span').textContent = `${total} active listings`;
-  }
-  T.acts.backToUS = () => T.render();
-  T.acts.enterCampus = (el) => { T.state.school = el.dataset.slug; T.state.chosen = true; T.save(); T.go('desktop'); };
 })(window.Trunk);

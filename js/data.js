@@ -8,7 +8,6 @@ window.Trunk = window.Trunk || {};
   T.MAT_TYPES = { textbook: 'Textbooks', lab: 'Lab manuals', calc: 'Calculators', safety: 'Safety gear', access: 'Access codes', other: 'Other' };
   T.CONDS = ['New', 'Like new', 'Good', 'Fair'];
 
-  /* Map positions use a 960x560 box; see T.project. */
   T.SCHOOLS = [
     { slug: 'ua', name: 'University of Alabama', short: 'UA', city: 'Tuscaloosa', st: 'AL', lat: 33.21, lng: -87.54, domains: ['crimson.ua.edu', 'ua.edu'], primary: '#B81E33', accessory: 'Crimson cap', logoText: 'TRUNK · TUSCALOOSA', vouchMin: 3, live: true },
     { slug: 'auburn', name: 'Auburn University', short: 'AU', city: 'Auburn', st: 'AL', lat: 32.6, lng: -85.49, domains: ['auburn.edu'], primary: '#C0392B', accessory: 'Bandana', logoText: 'TRUNK · AUBURN', vouchMin: 3, live: true },
@@ -17,9 +16,6 @@ window.Trunk = window.Trunk || {};
   T.school = (slug) => T.SCHOOLS.find((s) => s.slug === slug) || T.SCHOOLS[0];
   T.MILES = { ua: { auburn: 138, gt: 205 }, auburn: { ua: 138, gt: 108 }, gt: { ua: 205, auburn: 108 } };
 
-  const US = [[-124.7, 48.4], [-122.8, 49], [-95.2, 49], [-94.6, 48.7], [-89.6, 48], [-84.8, 46.9], [-82.5, 45.3], [-82.4, 43], [-79, 43.3], [-76.5, 44], [-75, 45], [-71.5, 45], [-70.2, 46.8], [-67.8, 47.1], [-67, 44.8], [-70, 43.7], [-70.7, 42.3], [-70, 41.7], [-74, 40.5], [-75.5, 38.5], [-76, 37], [-75.5, 35.3], [-77.5, 34.5], [-79, 33.2], [-81, 32], [-81.4, 30.5], [-80.1, 27], [-80.4, 25.2], [-81.2, 25.2], [-82.7, 27.5], [-82.8, 29.5], [-84, 30], [-85.5, 29.7], [-87.5, 30.3], [-89.5, 30.2], [-89.4, 29.2], [-91, 29.2], [-93.8, 29.7], [-95, 29], [-97.2, 27.6], [-97.4, 25.9], [-99.1, 26.4], [-100.3, 28.2], [-101.4, 29.8], [-102.7, 29.7], [-104.5, 29.6], [-106.5, 31.8], [-108.2, 31.8], [-108.2, 31.3], [-111, 31.3], [-114.8, 32.5], [-117.1, 32.5], [-118.5, 34], [-120.6, 34.5], [-121.9, 36.6], [-122.5, 37.8], [-123.8, 39.5], [-124.3, 40.3], [-124.1, 43], [-124.1, 46.2]];
-  T.project = (lng, lat) => [30 + ((lng + 125) / 59) * 900, 40 + ((50 - lat) / 26) * 480];
-  T.usPath = 'M' + US.map(([a, b]) => T.project(a, b).map((n) => n.toFixed(1)).join(' ')).join(' L') + ' Z';
 
   /* Campus map (fictional layout), 640x400 box. */
   T.BUILDINGS = [

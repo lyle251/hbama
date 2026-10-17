@@ -60,12 +60,12 @@
       if (c.status === 'NEGOTIATING') inner += `<div class="row">${!m.acc.me ? `<button class="btn btn--primary btn--sm" data-act="acceptMeetup" data-id="${c.lid}">Accept</button>` : ''}<button class="btn btn--sm" data-act="proposeMeetup" data-id="${c.lid}">Suggest a change</button></div>`;
       if (c.status === 'ON_HOLD') {
         inner += T.seg(due(c) ? 10 : 6, 10, true) + `<div class="hint">${due(c) ? 'Meetup time reached.' : 'Time until the meetup.'}</div><div class="row">
-          <a class="btn btn--sm btn--primary" href="#/live/${c.lid}">Meetup Live</a>
+          <a class="btn btn--sm btn--primary" href="#/live/${c.lid}">Go get it (pickup map)</a>
           ${due(c) ? `<button class="btn btn--sm btn--ok" data-act="confirmSale" data-id="${c.lid}" ${c.confirm.me ? 'disabled' : ''}>${c.confirm.me ? '✓ Waiting for ' + T.esc(name) : 'Confirm successful purchase'}</button>` : `<button class="btn btn--sm" data-act="fastForward" data-id="${c.lid}">Demo: jump to meetup time</button>`}
           <button class="btn btn--sm" data-act="cancelMeetup" data-id="${c.lid}">Cancel</button>${due(c) ? `<button class="btn btn--sm" data-act="noShow" data-id="${c.lid}">No-show</button>` : ''}</div>
           ${c.confirm.me && !c.confirm.them ? '<div class="hint">If only one of you confirms within 24 hours, you can <b>report a problem</b>.</div>' : ''}`;
       }
-      if (c.status === 'SOLD') inner += '<b class="px" style="font-size:22px;color:var(--red-700)">SOLD ✓ +10 credits each</b>';
+      if (c.status === 'SOLD') inner += '<b class="px" style="font-size:22px;color:var(--brand-700)">SOLD ✓ +10 credits each</b>';
     }
     if (!inner) return '';
     return `<div class="minwin" style="max-width:420px;align-self:center;width:100%"><header><span>Meetup</span>${T.chip(c.status)}</header><div class="stack sm">${inner}</div></div>`;
@@ -99,7 +99,7 @@
         if (c.status === 'AVAILABLE') { c.status = T.TX.next(c.status, 'message'); sync(c); }
         if (c.status === 'ON_HOLD') { c.status = T.TX.next(c.status, 'change_requested'); c.confirm = { me: false, them: false }; sync(c); }
         T.save(); T.render();
-        if (!asThem) later(1300, () => { T.TX.accept(c, 'them'); sys(c, `${T.user(c.with).name.split(' ')[0]} accepted. Listing is ON HOLD.`); sync(c); T.toast('ON HOLD: both of you accepted.'); });
+        if (!asThem) later(1300, () => { T.TX.accept(c, 'them'); sys(c, `${T.user(c.with).name.split(' ')[0]} accepted. Listing is ON HOLD.`); sync(c); pickupPrompt(c); });
       } }, { label: 'Cancel' }] });
     T.$('#pick-map', ov).addEventListener('click', (e) => {
       if (e.target.closest('.pin')) return;
@@ -110,6 +110,11 @@
     });
   }
 
+  /* The map only appears for pickup: once both accept, offer the live map showing buyer and seller to each other. */
+  function pickupPrompt(c) {
+    T.dialog({ title: 'On hold', body: `<b class="px" style="font-size:21px">Meetup confirmed.</b><span>${T.esc(c.meetup.name)}, ${fmt(c.meetup.when)}. When you head out, open the pickup map. You and ${T.esc(T.user(c.with).name.split(' ')[0])} will see each other's position, only until the meetup ends.</span>`,
+      buttons: [{ label: 'Open pickup map', cls: 'btn--primary', run: () => { T.go('live/' + c.lid); } }, { label: 'Later' }] });
+  }
   function complete(c) {
     const l = T.listing(c.lid), st = T.state, other = T.user(c.with);
     sync(c);
@@ -141,7 +146,7 @@
     quick: (el) => { const i = T.$('#c-text'); i.value = el.dataset.t; i.focus(); i.setSelectionRange(i.value.length, i.value.length); },
     proposeMeetup: (el) => proposeDialog(el.dataset.id, false),
     theyPropose: (el) => proposeDialog(el.dataset.id, true),
-    acceptMeetup: (el) => { const c = chatOf(el.dataset.id); T.TX.accept(c, 'me'); if (c.status === 'ON_HOLD') { sys(c, 'Both accepted. Listing is ON HOLD.'); T.toast('ON HOLD: both of you accepted.'); } sync(c); T.render(); },
+    acceptMeetup: (el) => { const c = chatOf(el.dataset.id); T.TX.accept(c, 'me'); if (c.status === 'ON_HOLD') { sys(c, 'Both accepted. Listing is ON HOLD.'); } sync(c); T.render(); if (c.status === 'ON_HOLD') pickupPrompt(c); },
     fastForward: (el) => { chatOf(el.dataset.id).meetup.ff = true; T.save(); T.render(); },
     confirmSale: (el) => {
       const c = chatOf(el.dataset.id); T.TX.confirm(c, 'me'); T.save(); T.render();
