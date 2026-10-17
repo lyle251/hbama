@@ -7,6 +7,32 @@
     if (mat) return `Similar items sold for $${Math.round(mat.newPrice * 0.3)}–$${Math.round(mat.newPrice * 0.55)} (new price is $${mat.newPrice}).`;
     return 'Not enough similar sales yet. Price it near what you would pay.';
   };
+  /* Price check: other sellers on Trunk for the same item, plus retail averages (demo estimates until the real sources are wired). */
+  T.priceCheck = function (l) {
+    const st = T.state, tok = (t) => t.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 3);
+    const lt = tok(l.title);
+    let sim = st.listings.filter((x) => x.id !== l.id && x.status !== 'SOLD' && (x.school === st.school || x.cross) && x.cat !== 'TUTOR' && x.cat !== 'RIDE' &&
+      ((l.mat && x.mat === l.mat) || (l.isbn && x.isbn === l.isbn)));
+    if (!sim.length) sim = st.listings.filter((x) => x.id !== l.id && x.status !== 'SOLD' && (x.school === st.school || x.cross) && x.cat === l.cat && tok(x.title).filter((w) => lt.includes(w)).length >= 2);
+    sim.sort((a, b) => a.price - b.price);
+    const avg = sim.length ? Math.round(sim.reduce((a, x) => a + x.price, 0) / sim.length) : null;
+    return { sim, avg, ref: T.adapters.priceRef.lookup(l) };
+  };
+  function priceCheckHTML(l) {
+    const { sim, avg, ref } = T.priceCheck(l);
+    const rows = [['This listing', l.price, 'ok']];
+    if (avg !== null) rows.push([`Other sellers avg (${sim.length})`, avg, '']);
+    if (ref) rows.push(['UA Supply Store avg*', ref.supply, 'warn'], ['Amazon avg*', ref.amazon, 'warn']);
+    const max = Math.max(...rows.map((r) => r[1]), 1);
+    let verdict = '';
+    if (avg !== null) { const d = l.price - avg; verdict = d <= -3 ? `<span class="chip chip--ver">$${-d} below other sellers</span>` : d >= 3 ? `<span class="chip chip--hold">$${d} above other sellers</span>` : '<span class="chip chip--soft">In line with other sellers</span>'; }
+    const save = ref && ref.supply > l.price ? `<b style="color:var(--ok)">Save $${ref.supply - l.price} vs the Supply Store (${Math.round((1 - l.price / ref.supply) * 100)}% off).</b>` : '';
+    const list = sim.length ? `<div style="overflow-x:auto"><table class="table"><tr><th>Seller</th><th>Item</th><th>Price</th><th>vs this</th></tr>${sim.slice(0, 5).map((x) => { const d = x.price - l.price; return `<tr><td>${T.esc(T.user(x.seller).name.split(' ')[0])}</td><td><a href="#/listing/${x.id}">${T.esc(x.title.slice(0, 34))}</a><div class="hint">${x.school === T.state.school ? T.spot(x.spot).name : T.school(x.school).short + ' (other campus)'}</div></td><td class="num">$${x.price}</td><td class="num ${d > 0 ? 'delta-up' : d < 0 ? 'delta-down' : ''}">${d === 0 ? 'same' : (d > 0 ? '+$' : '-$') + Math.abs(d)}</td></tr>`; }).join('')}</table></div>` : '<p class="hint">No other sellers have this exact item right now.</p>';
+    return `<div class="panel stack sm" id="price-check"><div class="row between"><b class="px" style="font-size:20px">Price check</b>${verdict}</div>
+      ${rows.map((r) => `<div class="meter-row" style="grid-template-columns:minmax(120px,170px) 1fr 64px"><span>${r[0]}</span>${T.seg(Math.max(1, Math.round(r[1] / max * 10)), 10, r[2])}<span class="num">$${r[1]}</span></div>`).join('')}
+      ${save}${ref ? '<span class="pc-note">*Demo estimates from list prices, not live store prices. TODO_VERIFY</span>' : '<span class="pc-note">No store benchmark for this kind of item.</span>'}
+      <details ${sim.length ? 'open' : ''}><summary class="px" style="font-size:19px">Same item from other sellers (${sim.length})</summary>${list}</details></div>`;
+  }
   T.vouchBadge = function (uid) {
     const v = T.state.vouches.find((x) => x.to === uid && x.status !== 'FORFEITED');
     if (!v) return '';
@@ -40,13 +66,13 @@
       ].filter(Boolean).join('');
       const fav = T.state.favorites[l.id];
       const body = `<div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
-        <div class="stack"><div class="file__thumb" style="aspect-ratio:4/3;box-shadow:var(--shadow-btn)">${T.glyph(l.cat)}<span class="file__fold"></span>${l.status === 'SOLD' ? '<span class="stamp slam">SOLD</span>' : ''}</div>
-          <div class="panel"><b class="px" style="font-size:20px">Price helper</b><div>${T.esc(T.priceHint(l))}</div></div></div>
+        <div class="stack"><div class="file__thumb" style="aspect-ratio:4/3;box-shadow:var(--shadow-btn)">${T.glyph(l.cat)}${T.coverImg(l)}<span class="file__fold"></span>${l.status === 'SOLD' ? '<span class="stamp slam">SOLD</span>' : ''}</div></div>
         <div class="stack">
           <div class="row between"><h1 style="font-size:30px">${T.esc(l.title)}</h1></div>
           <div class="row"><b class="px" style="font-size:34px;color:var(--brand-700)">${T.money(l.price)}</b>${T.chip(l.status)}<span class="chip chip--soft">${l.cond}</span>${l.cross ? '<span class="chip">Ships or meets halfway</span>' : ''}</div>
+          ${priceCheckHTML(l)}
           <p>${T.esc(l.desc || 'No description.')}</p>
-          <dl class="kv"><dt>Category</dt><dd>${T.CATS[l.cat]}</dd>${extra}<dt>Meetup</dt><dd>${T.spot(l.spot).name} ${T.spot(l.spot).safe ? '<span class="chip chip--ver">SAFE SPOT</span>' : ''}</dd><dt>Distance</dt><dd>${T.distance(l)}</dd></dl>
+          <dl class="kv"><dt>Category</dt><dd>${T.CATS[l.cat]}</dd>${extra}<dt>Pickup</dt><dd>${T.spot(l.spot).name}<br><span class="hint">${T.spot(l.spot).addr}</span></dd></dl>
           ${l.course ? `<div class="panel" style="padding:8px 10px">Need help with ${l.course}? <a href="#/hub/Tutoring"><b>Campus Hub → Tutoring</b></a></div>` : ''}
           <div class="panel"><div class="row">${T.avatar(l.seller)}<a href="#/profile/${u.id}"><b>${T.esc(u.name)}</b></a>${u.verified ? T.verifiedChip : ''}<span class="muted">${u.ratings ? '★' + u.rating.toFixed(1) + ' (' + u.ratings + ')' : 'New seller'}</span></div>
             <div class="row" style="margin:6px 0">${T.vouchBadge(u.id)}</div>${T.trustMeter(u.id)}</div>

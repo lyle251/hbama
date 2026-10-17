@@ -89,6 +89,23 @@ window.Trunk = window.Trunk || {};
     return { text: 'I can list what a class needs and who sells it. Try a course code like ECE 380, or an item like a calculator or lab coat.', cards: [], chips: ['What do I need for ECE 380?', 'Find a calculator', 'Where can I get tutoring?'] };
   }
 
+  /* Retail benchmarks for the Price check panel. Mock: derived from each material's list price (demo estimates, not live).
+     Real: UA Supply Store catalog lookup by ISBN, and the Amazon Product Advertising API (needs an Associates account and keys). */
+  const priceRef = {
+    mock: { lookup(l) {
+      const m = l.mat && T.allMats().find((x) => x.key === l.mat);
+      return m ? { supply: m.newPrice, amazon: Math.round(m.newPrice * 0.86), estimate: true } : null;
+    } },
+    real: { lookup() { /* TODO: server route that queries both sources by ISBN/UPC and caches for a day. */ return null; } },
+  };
+  /* Product images. Uploaded photos come first. Books fall back to the free Open Library cover for the ISBN (no key).
+     TODO: Amazon Product Advertising API images for non-book items once Associates keys exist. Scraping Google or Amazon pages is not used. */
+  const images = { url(l) {
+    if (l.photo) return l.photo;
+    const isbn = (l.isbn || '').replace(/[^0-9Xx]/g, '');
+    return isbn.length >= 10 ? `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg?default=false` : null;
+  } };
+
   const verification = {
     mock: { async verify(id) { await wait(400); return /^1\d{7}$/.test(id); } },
     real: { async verify() { /* TODO: SheerID verification request with the student's ID and document upload. */ throw new Error('Not configured'); } },
@@ -102,5 +119,5 @@ window.Trunk = window.Trunk || {};
     real: { async put() { /* TODO: presigned S3 PUT, return the object URL. */ throw new Error('Not configured'); } },
   };
   const pick = (a) => (T.DEMO_MODE ? a.mock : a.real);
-  T.adapters = { registrar: pick(registrar), ai: pick(ai), verification: pick(verification), realtime: pick(realtime), assistant: pick(assistant), storage: pick(storage) };
+  T.adapters = { registrar: pick(registrar), ai: pick(ai), verification: pick(verification), realtime: pick(realtime), assistant: pick(assistant), priceRef: pick(priceRef), images, storage: pick(storage) };
 })(window.Trunk);

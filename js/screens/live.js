@@ -2,13 +2,15 @@
    Positions live only in memory and are dropped when the meetup ends (see README, privacy). */
 (function (T) {
   let timer = null, walk = null;
-  const ME_START = { x: 560, y: 360 }, THEM_START = { x: 70, y: 40 };
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const startMe = (d) => ({ x: clamp(d.x + 150, 30, 610), y: clamp(d.y + 120, 40, 360) });
+  const startThem = (d) => ({ x: clamp(d.x - 150, 30, 610), y: clamp(d.y - 100, 40, 360) });
   const lerp = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
 
   function stop() { if (timer) { clearInterval(timer); timer = null; } }
   function pins(w) {
     const dest = w.dest;
-    return [{ id: 'me', ...lerp(ME_START, dest, w.t), label: 'You', variant: 'ellie' }, { id: 'them', ...lerp(THEM_START, dest, Math.min(1, w.t * 1.05)), label: w.name, variant: 'rosie' }];
+    return [{ id: 'me', ...lerp(startMe(dest), dest, w.t), label: 'You', variant: 'ellie' }, { id: 'them', ...lerp(startThem(dest), dest, Math.min(1, w.t * 1.05)), label: w.name, variant: 'rosie' }];
   }
   function eta(w) { return Math.max(0, Math.round((1 - w.t) * w.mins)); }
 
@@ -28,9 +30,9 @@
             <div class="row">${[60, 30, 15].map((n) => `<button class="btn btn--sm" data-act="shareWin" data-n="${n}">${n} min before</button>`).join('')}</div></div>`;
       return T.win({
         title: 'Pickup map', tone: 'focus',
-        body: `<div class="stack"><div class="row between"><div><b class="px" style="font-size:22px">${T.esc(l.title.slice(0, 40))}</b><div class="hint">${T.esc(m.name)} · ${new Date(m.when).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' })} ${m.safe ? '· <b>safe, public spot</b>' : '· public pin'}</div></div>${T.ellie({ pose: 'watch', size: 80 })}</div>
+        body: `<div class="stack"><div class="row between"><div><b class="px" style="font-size:22px">${T.esc(l.title.slice(0, 40))}</b><div class="hint">${T.esc(m.name)}, ${T.esc(m.addr || T.spot(m.spotId).addr)} · ${new Date(m.when).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' })} · <a href="${T.mapsUrl(T.spot(m.spotId))}" target="_blank" rel="noopener">Open in Maps</a></div></div>${T.ellie({ pose: 'watch', size: 80 })}</div>
           ${consent}
-          <div class="mapbox" id="live-map">${T.campusSVG({ pins: win ? pins(walk) : [], safeOnly: false, path: win ? [[ME_START.x, ME_START.y], [m.x, m.y]] : null })}</div>
+          <div class="mapbox" id="live-map">${T.campusSVG({ pins: win ? pins(walk) : [], safeOnly: false, path: win ? [[startMe(m).x, startMe(m).y], [m.x, m.y]] : null })}</div>
           <div><div class="px" style="font-size:20px" id="live-eta">Arriving in ${win ? eta(walk) + ' min' : '—'}</div><div id="live-bar">${T.seg(Math.round(walk.t * 10), 10, true)}</div></div>
           <div class="row"><button class="btn btn--sm" data-act="simWalk" ${win ? '' : 'disabled'}>▶ Simulate walk</button><button class="btn btn--primary" data-act="arrived" ${win ? '' : 'disabled'}>I've arrived</button><button class="btn" data-act="shareFriends">Share with friends</button><button class="btn btn--sos" data-act="sos">SOS</button>${win ? '<button class="btn btn--sm" data-act="stopShare">Stop sharing</button>' : ''}<button class="btn btn--sm" data-act="checkin">Demo: 15 min after meetup</button></div>
           <div class="hint" id="live-note">${walk.arrived.me ? '✓ You arrived.' : ''}${walk.arrived.them ? ' ✓ ' + T.esc(name) + ' arrived.' : ''}</div></div>`,
@@ -43,7 +45,7 @@
   function redraw() {
     const m = T.$('#live-map'); if (!m || !walk) return;
     const c = T.state.chats[walk.lid];
-    m.innerHTML = T.campusSVG({ pins: pins(walk), path: [[ME_START.x, ME_START.y], [c.meetup.x, c.meetup.y]] });
+    m.innerHTML = T.campusSVG({ pins: pins(walk), path: [[startMe(c.meetup).x, startMe(c.meetup).y], [c.meetup.x, c.meetup.y]] });
     T.$('#live-eta').textContent = 'Arriving in ' + eta(walk) + ' min';
     T.$('#live-bar').innerHTML = T.seg(Math.round(walk.t * 10), 10, true);
   }

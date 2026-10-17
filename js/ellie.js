@@ -11,9 +11,9 @@ window.Trunk = window.Trunk || {};
   const S = `stroke="${INK}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"`;
 
   function accessory(kind, c) {
-    if (kind === 'cap') return `<path d="M36 40 Q60 12 84 40 Z" fill="${c}" ${S}/><path d="M80 38 Q98 38 100 44 Q88 46 78 43 Z" fill="${c}" ${S}/><circle cx="60" cy="17" r="3" fill="#fff" ${S}/>`;
+    if (kind === 'cap') return `<path d="M43 36 Q60 5 77 36 Z" fill="${c}" ${S}/><path d="M74 35 Q86 34 89 39 Q81 41 73 39 Z" fill="${c}" ${S}/><circle cx="60" cy="20" r="2.5" fill="#fff" ${S}/>`;
     if (kind === 'bandana') return `<path d="M38 64 Q60 78 82 64 L76 72 L60 90 L44 72 Z" fill="${c}" ${S}/><circle cx="55" cy="72" r="1.8" fill="${INK}"/><circle cx="65" cy="72" r="1.8" fill="${INK}"/>`;
-    if (kind === 'party') return `<path d="M48 34 L60 6 L72 34 Z" fill="${c}" ${S}/><circle cx="60" cy="6" r="4" fill="#E8B4A6" ${S}/><path d="M53 24 L67 24" stroke="#4C7A2E" stroke-width="3"/>`;
+    if (kind === 'party') return `<path d="M50 32 L60 10 L70 32 Z" fill="${c}" ${S}/><circle cx="60" cy="10" r="3" fill="#E0A526" ${S}/><path d="M54 25 L66 25" stroke="#4C7A2E" stroke-width="2.5"/>`;
     if (kind === 'bow') return `<path d="M60 26 L48 18 L48 34 Z M60 26 L72 18 L72 34 Z" fill="${c}" ${S}/><circle cx="60" cy="26" r="3.5" fill="${c}" ${S}/>`;
     return '';
   }
@@ -49,7 +49,7 @@ window.Trunk = window.Trunk || {};
       ? `<path d="M80 58 Q104 52 100 34" fill="none" stroke="${INK}" stroke-width="15" stroke-linecap="round"/><path d="M80 58 Q104 52 100 34" fill="none" stroke="${v.body}" stroke-width="10" stroke-linecap="round"/>`
       : '';
     const trunk = pose === 'wave'
-      ? `<path d="M62 56 Q66 82 54 88 Q46 91 47 84" fill="none" stroke="${INK}" stroke-width="15" stroke-linecap="round"/><path d="M62 56 Q66 82 54 88 Q46 91 47 84" fill="none" stroke="${v.body}" stroke-width="10" stroke-linecap="round"/>`
+      ? ''
       : `<path d="M60 56 Q58 80 72 84 Q80 85 78 77" fill="none" stroke="${INK}" stroke-width="15" stroke-linecap="round"/><path d="M60 56 Q58 80 72 84 Q80 85 78 77" fill="none" stroke="${v.body}" stroke-width="10" stroke-linecap="round"/>`;
     const toes = (x) => `<path d="M${x - 5} 105 q1 -3 3 0 M${x} 105 q1 -3 3 0 M${x + 5} 105 q1 -3 3 0" fill="none" stroke="${INK}" stroke-width="1.6" stroke-linecap="round"/>`;
     const aria = opts.label ? `role="img" aria-label="${opts.label}"` : 'aria-hidden="true"';

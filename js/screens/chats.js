@@ -11,7 +11,7 @@
 
   function reply(c, text) {
     const t = text.toLowerCase();
-    const r = /available/.test(t) ? 'Yes, still available!' : /\$|do .*\d/.test(t) ? 'I can come down a little if we meet today.' : /where|meet/.test(t) ? 'Library steps or the Quad Fountain work for me.' : 'Sounds good!';
+    const r = /available/.test(t) ? 'Yes, still available!' : /\$|do .*\d/.test(t) ? 'I can come down a little if we meet today.' : /where|meet/.test(t) ? 'Gorgas Library or the Student Center work for me.' : 'Sounds good!';
     later(1100, () => { c.msgs.push({ from: c.with, text: r, t: now() }); T.save(); });
   }
   function send(lid, text, img) {
@@ -56,7 +56,7 @@
       if (c.status === 'AVAILABLE') inner = '';
     } else {
       const sp = m.name;
-      inner = `<dl class="kv"><dt>Where</dt><dd><b>${T.esc(sp)}</b> ${m.safe ? '<span class="chip chip--ver">SAFE SPOT</span>' : '<span class="chip chip--hold">PUBLIC PIN</span>'}</dd><dt>When</dt><dd class="num"><b>${fmt(m.when)}</b></dd><dt>Accepted</dt><dd>${m.acc.me ? '✓ You' : '… You'} · ${m.acc.them ? '✓ ' + T.esc(name) : '… ' + T.esc(name)}</dd></dl>`;
+      inner = `<dl class="kv"><dt>Where</dt><dd><b>${T.esc(sp)}</b><br><span class="hint">${T.esc(m.addr || T.spot(m.spotId).addr)}</span> <a href="${T.mapsUrl(T.spot(m.spotId))}" target="_blank" rel="noopener">Open in Maps</a></dd><dt>When</dt><dd class="num"><b>${fmt(m.when)}</b></dd><dt>Accepted</dt><dd>${m.acc.me ? '✓ You' : '… You'} · ${m.acc.them ? '✓ ' + T.esc(name) : '… ' + T.esc(name)}</dd></dl>`;
       if (c.status === 'NEGOTIATING') inner += `<div class="row">${!m.acc.me ? `<button class="btn btn--primary btn--sm" data-act="acceptMeetup" data-id="${c.lid}">Accept</button>` : ''}<button class="btn btn--sm" data-act="proposeMeetup" data-id="${c.lid}">Suggest a change</button></div>`;
       if (c.status === 'ON_HOLD') {
         inner += T.seg(due(c) ? 10 : 6, 10, true) + `<div class="hint">${due(c) ? 'Meetup time reached.' : 'Time until the meetup.'}</div><div class="row">
@@ -71,43 +71,36 @@
     return `<div class="minwin" style="max-width:420px;align-self:center;width:100%"><header><span>Meetup</span>${T.chip(c.status)}</header><div class="stack sm">${inner}</div></div>`;
   }
 
-  /* ---------- meetup proposal dialog with map picker ---------- */
-  T.pick = { spot: 'libsteps', pin: null };
-  function mapHTML() {
-    const p = T.pick;
-    let svg = T.campusSVG({ pick: true, sel: p.spot });
-    if (p.pin) svg = svg.replace('</svg>', `<g><circle cx="${p.pin.x}" cy="${p.pin.y}" r="11" style="fill:var(--warn);stroke:var(--ink);stroke-width:2.5"/><text x="${p.pin.x}" y="${p.pin.y + 5}" text-anchor="middle" style="font:700 13px Nunito;fill:#3B1F22">★</text></g></svg>`);
-    return svg;
+  /* ---------- meetup proposal: choose one of the five pickup places ---------- */
+  T.pick = { spot: 'gorgas' };
+  function pickHTML() {
+    const sp = T.spot(T.pick.spot);
+    return `<div class="mapbox" id="pick-map">${T.campusSVG({ pick: true, sel: T.pick.spot })}</div>
+      <div class="stack sm" role="radiogroup" aria-label="Pickup place">${T.SPOTS.map((x) => `<label class="check panel" style="padding:8px 10px"><input type="radio" name="spot" value="${x.id}" ${x.id === T.pick.spot ? 'checked' : ''} data-act="pickSpotRadio"><span><b>${x.name}</b><br><span class="hint">${x.addr}${x.verify ? ' (confirm before going)' : ''}</span></span></label>`).join('')}</div>`;
   }
-  T.acts.pickSpot = (el) => { T.pick.spot = el.dataset.spot; T.pick.pin = null; const m = T.$('#pick-map'); if (m) { m.innerHTML = mapHTML(); T.$('#pick-name').textContent = T.spot(T.pick.spot).name; } };
+  function setSpot(id) { T.pick.spot = id; const box = T.$('#pick-box'); if (box) box.innerHTML = pickHTML(); }
+  T.acts.pickSpot = (el) => setSpot(el.dataset.spot);
+  T.acts.pickSpotRadio = (el) => setSpot(el.value);
 
   function proposeDialog(lid, asThem) {
     const c = chatOf(lid);
     const d = new Date(Date.now() + 3600e3); d.setMinutes(Math.ceil(d.getMinutes() / 15) * 15, 0, 0);
     const iso = new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 16);
-    T.pick = { spot: 'libsteps', pin: null };
-    const ov = T.dialog({ title: asThem ? 'Meetup' : 'Propose a meetup', body: `<b class="px" style="font-size:21px">${asThem ? T.esc(T.user(c.with).name.split(' ')[0]) + ' proposes' : 'Propose'} a meetup</b>
+    T.pick = { spot: 'gorgas' };
+    T.dialog({ title: asThem ? 'Meetup' : 'Propose a meetup', body: `<b class="px" style="font-size:21px">${asThem ? T.esc(T.user(c.with).name.split(' ')[0]) + ' proposes' : 'Propose'} a meetup</b>
       <label class="field"><span class="px">Date and time</span><input class="input" type="datetime-local" id="mt-when" value="${iso}"></label>
-      <div><span class="px" style="font-size:19px">Place: <b id="pick-name">${T.spot('libsteps').name}</b></span><div class="hint">Tap a safe spot, or tap anywhere on the map to drop a pin inside campus.</div></div>
-      <div class="mapbox" id="pick-map">${mapHTML()}</div>`,
+      <div class="hint">Meetups happen at one of five public campus places. Pick one.</div><div class="stack" id="pick-box">${pickHTML()}</div>`,
       buttons: [{ label: asThem ? 'Receive' : 'Send proposal', cls: 'btn--primary', run: (o) => {
         const when = new Date(T.$('#mt-when', o).value).getTime();
         if (!when || when < Date.now() - 6e4) { T.toast('Pick a time in the future.'); return false; }
-        const p = T.pick, sp = p.pin ? { name: 'Dropped pin', x: p.pin.x, y: p.pin.y, safe: false, id: 'pin' } : { ...T.spot(p.spot) };
-        c.meetup = { spotId: sp.id, name: sp.name, x: sp.x, y: sp.y, safe: sp.safe, when, acc: { me: !asThem, them: !!asThem }, ff: false };
+        const sp = { ...T.spot(T.pick.spot) };
+        c.meetup = { spotId: sp.id, name: sp.name, addr: sp.addr, x: sp.x, y: sp.y, safe: true, when, acc: { me: !asThem, them: !!asThem }, ff: false };
         sys(c, asThem ? `${T.user(c.with).name.split(' ')[0]} proposed ${sp.name}, ${fmt(when)}` : `You proposed ${sp.name}, ${fmt(when)}`);
         if (c.status === 'AVAILABLE') { c.status = T.TX.next(c.status, 'message'); sync(c); }
         if (c.status === 'ON_HOLD') { c.status = T.TX.next(c.status, 'change_requested'); c.confirm = { me: false, them: false }; sync(c); }
         T.save(); T.render();
         if (!asThem) later(1300, () => { T.TX.accept(c, 'them'); sys(c, `${T.user(c.with).name.split(' ')[0]} accepted. Listing is ON HOLD.`); sync(c); pickupPrompt(c); });
       } }, { label: 'Cancel' }] });
-    T.$('#pick-map', ov).addEventListener('click', (e) => {
-      if (e.target.closest('.pin')) return;
-      const svg = T.$('#campus-svg', ov), r = svg.getBoundingClientRect();
-      const x = Math.round(((e.clientX - r.left) / r.width) * 640), y = Math.round(((e.clientY - r.top) / r.height) * 400);
-      if (x < 8 || y < 8 || x > 632 || y > 392) return;
-      T.pick.pin = { x, y }; T.pick.spot = ''; T.$('#pick-map', ov).innerHTML = mapHTML(); T.$('#pick-name', ov).textContent = 'Dropped pin (not a safe spot)';
-    });
   }
 
   /* The map only appears for pickup: once both accept, offer the live map showing buyer and seller to each other. */

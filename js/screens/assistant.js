@@ -8,13 +8,13 @@
   function card(c) {
     if (c.kind === 'material') {
       const sellers = c.sellers.length
-        ? c.sellers.slice(0, 3).map((s) => `<div class="row between" style="gap:6px"><span><a href="#/listing/${s.id}" data-act="assistClose"><b>$${s.price}</b> ${T.esc(s.seller)}</a> <span class="hint">★${s.rating ? s.rating.toFixed(1) : 'new'} · ${s.walk} min walk${s.safe ? ' · safe spot' : ''}</span></span><button class="btn btn--sm" data-act="assistMsg" data-id="${s.id}">Message</button></div>`).join('')
+        ? c.sellers.slice(0, 3).map((s) => `<div class="row between" style="gap:6px"><span><a href="#/listing/${s.id}" data-act="assistClose"><b>$${s.price}</b> ${T.esc(s.seller)}</a> <span class="hint">★${s.rating ? s.rating.toFixed(1) : 'new'} · pickup at ${T.esc(s.spot)}</span></span><button class="btn btn--sm" data-act="assistMsg" data-id="${s.id}">Message</button></div>`).join('')
         : `<div class="hint">No sellers on campus yet.</div><button class="btn btn--sm" data-act="assistWanted" data-name="${T.esc(c.name)}" data-course="${c.course}">Post a Wanted request</button>`;
       return `<div class="acard"><div class="row between"><b>${T.esc(c.name)}</b><span class="chip chip--soft">${c.course}</span></div>
         <div class="row" style="gap:4px"><span class="chip chip--soft">${T.esc(c.type)}</span>${c.edition ? `<span class="chip chip--soft">${T.esc(c.edition)} ed.</span>` : ''}${c.isbn ? `<span class="chip chip--soft num">ISBN ${c.isbn}</span>` : ''}<span class="chip">${c.src === 'registrar' ? 'from registrar' : 'from syllabus'}</span></div>
         <div class="hint">Buy new: about $${c.newPrice}. Bookstore link: TODO_VERIFY</div>${sellers}</div>`;
     }
-    if (c.kind === 'listing') return `<div class="acard"><div class="row between"><a href="#/listing/${c.id}" data-act="assistClose"><b>${T.esc(c.title)}</b></a><b>$${c.price}</b></div><div class="hint">${T.esc(c.seller)} · ${c.walk} min walk · ${T.esc(c.spot)}</div><div class="row"><button class="btn btn--sm" data-act="assistMsg" data-id="${c.id}">Message seller</button></div></div>`;
+    if (c.kind === 'listing') return `<div class="acard"><div class="row between"><a href="#/listing/${c.id}" data-act="assistClose"><b>${T.esc(c.title)}</b></a><b>$${c.price}</b></div><div class="hint">${T.esc(c.seller)} · pickup at ${T.esc(c.spot)}</div><div class="row"><button class="btn btn--sm" data-act="assistMsg" data-id="${c.id}">Message seller</button></div></div>`;
     if (c.kind === 'resource') return `<div class="acard"><b>${T.esc(c.name)}</b>${c.desc ? `<div class="hint">${T.esc(c.desc)}</div>` : ''}<div class="hint">Contact details: TODO_VERIFY</div><a class="btn btn--sm" href="#/hub/${encodeURIComponent(c.cat)}" data-act="assistClose" style="align-self:flex-start">Open in Campus Hub</a></div>`;
     return '';
   }

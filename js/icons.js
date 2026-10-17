@@ -26,7 +26,6 @@ window.Trunk = window.Trunk || {};
   /** Folder with an elephant peeking out, tinted for a category. */
   T.folder = function (accent = '#C9A06A') {
     return `<svg viewBox="0 0 64 64" aria-hidden="true">
-      <g transform="translate(18 2)"><circle cx="14" cy="14" r="11" fill="#fff" stroke="${I}" stroke-width="2"/><circle cx="3" cy="14" r="6" fill="#fff" stroke="${I}" stroke-width="2"/><circle cx="25" cy="14" r="6" fill="#fff" stroke="${I}" stroke-width="2"/><circle cx="10" cy="12" r="1.8" fill="${I}"/><circle cx="18" cy="12" r="1.8" fill="${I}"/><path d="M14 16 q0 7 5 6" fill="none" stroke="${I}" stroke-width="2" stroke-linecap="round"/></g>
       <path d="M4 22 h20 l5 5 h31 v32 H4 Z" fill="${accent}" stroke="${I}" stroke-width="2" stroke-linejoin="round"/>
       <path d="M4 32 h56" stroke="${I}" stroke-width="2"/></svg>`;
   };

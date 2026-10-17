@@ -22,7 +22,7 @@ Open `http://localhost:8080`, then go to `#/demo` for the judging script (switch
 | Semester Kit | `#/kit` | myBama sync (mock), required items per course, "X sellers, lowest $Y", "Already have it", savings total, ranked matches, Wanted requests, syllabus paste, reverse "sell it" flow |
 | Sell | `#/sell` | Class Materials require a course, category-specific fields, price helper, photos |
 | Messenger | `#/chats` | Per-listing chat, meetup proposal on the campus map, ON HOLD, both confirm, SOLD, credits, ratings and reviews |
-| Pickup map | `#/live/ID` | The only map in the app. It opens when both people accept a meetup, and shows buyer and seller to each other. Opt-in share window (60, 30 or 15 min), simulated walk, arrival, friend share link, SOS, 15-minute check-in |
+| Pickup map | `#/live/ID` | The only map in the app, with the five pickup places (below). It opens when both people accept a meetup, and shows buyer and seller to each other. Opt-in share window (60, 30 or 15 min), simulated walk, arrival, friend share link, SOS, 15-minute check-in |
 | Profile | `#/profile/ID` | One profile for buying and selling, Trust Score breakdown, reviews, credit ledger, vouching |
 | Campus Hub | `#/hub` | Per-tenant resource directory, open-now, favorites, "which resource do I need?" quiz, links to tutoring listings |
 | Ask Ellie | button on every page | Shopping assistant. Ask "what do I need for ECE 380?" and get each item, the price new, and the sellers on your campus with links. Runs on a mock until the Gemma key is added |
@@ -50,6 +50,25 @@ Open `http://localhost:8080`, then go to `#/demo` for the judging script (switch
 1. Open `#/admin/schools/new` (Start menu, or Demo controls).
 2. Enter name, slug, `.edu` domain, latitude, longitude and a color. Submit.
 3. The school appears on the US map and students with that email domain can sign up.
+
+## Pickup places
+
+Meetups happen at one of five public campus places. Addresses were checked against UA pages; the two marked "confirm" came from a secondary page or a conflicting listing, so check them before launch.
+
+| Place | Address |
+|---|---|
+| Student Center | 751 Campus Dr W, Tuscaloosa, AL 35487 |
+| Gorgas Library | 711 Capstone Dr, Tuscaloosa, AL 35487 |
+| Rodgers Library | 335 Hackberry Ln, Tuscaloosa, AL 35487 |
+| Bruno Library (confirm) | 425 Stadium Dr, Tuscaloosa, AL 35487 |
+| Rec Center (confirm) | 400 Peter Bryce Blvd, Tuscaloosa, AL 35401 (an older UREC page lists 401 5th Ave E) |
+
+The in-app map is a schematic with approximate positions, not to scale. Each place links to Google Maps for real directions.
+
+## Price check and product images
+
+- Opening a listing shows a **Price check**: this price against the average of other sellers with the same item (same material, ISBN or course item), plus the UA Supply Store and Amazon averages. The two retail numbers are **demo estimates** derived from list prices until the real sources are wired (`priceRef` adapter).
+- Product images: the seller's own photo comes first. Books fall back to the free Open Library cover for the ISBN. Other items show an item icon until a photo is uploaded. Amazon product images need the Product Advertising API and an Associates account (stubbed). Google and Amazon pages are not scraped.
 
 ## Privacy and safety design
 

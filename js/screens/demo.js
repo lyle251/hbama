@@ -9,7 +9,7 @@
   function ensureHold() {
     const c = T.state.chats.L06; if (!c) return;
     if (c.status === 'SOLD') return;
-    if (!c.meetup) c.meetup = { spotId: 'quad', name: 'Quad Fountain', x: 220, y: 235, safe: true, when: Date.now() + 36e5, acc: { me: true, them: true }, ff: false };
+    if (!c.meetup) c.meetup = { spotId: 'student', name: 'Student Center', addr: T.spot('student').addr, x: 200, y: 190, safe: true, when: Date.now() + 36e5, acc: { me: true, them: true }, ff: false };
     c.meetup.acc = { me: true, them: true }; c.status = 'ON_HOLD'; T.listing('L06').status = 'ON_HOLD'; T.save();
   }
   const STEPS = [

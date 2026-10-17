@@ -57,7 +57,7 @@
   };
 
   T.distance = (l) => {
-    if (l.school === T.state.school) return `${T.walkMin(l.spot)} min walk`;
+    if (l.school === T.state.school) return T.spot(l.spot).name;
     const mi = (T.MILES[T.state.school] || {})[l.school];
     return `${mi || '?'} mi · ${T.school(l.school).short}`;
   };
@@ -66,12 +66,13 @@
     const u = T.user(l.seller);
     const crossBadge = l.school !== T.state.school ? `<span class="chip chip--neg">${T.school(l.school).short}</span>` : '';
     return `<a class="file" href="#/listing/${l.id}" style="text-decoration:none" aria-label="${T.esc(l.title)}, ${T.money(l.price)}">
-      <div class="file__thumb">${T.glyph(l.cat)}<span class="file__fold"></span><span class="file__tag">${T.money(l.price)}</span>${l.status === 'SOLD' ? '<span class="stamp">SOLD</span>' : ''}</div>
+      <div class="file__thumb">${T.glyph(l.cat)}${T.coverImg(l)}<span class="file__fold"></span><span class="file__tag">${T.money(l.price)}</span>${l.status === 'SOLD' ? '<span class="stamp">SOLD</span>' : ''}</div>
       <div class="file__name">${T.esc(l.title)}</div>
       <div class="row" style="gap:4px">${T.chip(l.status)}${l.course ? `<span class="chip chip--soft">${T.esc(l.course)}</span>` : ''}${crossBadge}${T.verifiedChipSmall(l.seller)}</div>
       <div class="file__meta"><span class="row" style="gap:5px;flex-wrap:nowrap">${T.avatar(l.seller)}${u.ratings ? '★' + u.rating.toFixed(1) : 'New'}</span><span>${T.distance(l)}</span></div>
     </a>`;
   };
+  T.coverImg = (l) => { const u = T.adapters.images.url(l); return u ? `<img class="cover" src="${u}" alt="Cover of ${T.esc(l.title)}" loading="lazy" onerror="this.remove()">` : ''; };
   T.verifiedChipSmall = (uid) => (T.user(uid).verified ? '' : '<span class="chip">unverified</span>');
 
   function resultsHTML() {

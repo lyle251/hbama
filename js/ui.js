@@ -116,7 +116,7 @@ window.Trunk = window.Trunk || {};
   };
 
   /* ---------- shell ---------- */
-  const NAV = [['market', 'Market'], ['kit', 'Semester Kit'], ['sell', 'Sell'], ['chats', 'Messages'], ['hub', 'Campus Hub'], ['explore', 'Other campuses']];
+  const NAV = [['market', 'Market'], ['kit', 'Semester Kit'], ['sell', 'Sell'], ['chats', 'Messages'], ['hub', 'Campus Hub'], ['explore', 'Campuses']];
   const TABS = [['market', 'Market', 'market'], ['kit', 'Kit', 'kit'], ['sell', 'Sell', 'sell'], ['chats', 'Chats', 'chats'], ['hub', 'Hub', 'hub'], ['profile', 'Profile', 'profile']];
 
   function closeStart() { const m = T.$('.startmenu'); if (m) m.remove(); const b = T.$('#acct'); if (b) b.setAttribute('aria-expanded', 'false'); }
