@@ -402,3 +402,15 @@ input[type=radio]:checked::after { content: ""; width: 8px; height: 8px; border-
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .window, .dialog { animation: none !important; }
 }
+
+/* Profile avatar in a monitor frame with elephant-ear stickers */
+.mon { position: relative; width: 132px; padding: 14px 14px 22px; border: var(--outline); border-radius: 10px; background: var(--red-100); box-shadow: var(--shadow-btn); flex: none; }
+.mon::after { content: ""; position: absolute; left: 36px; right: 36px; bottom: -12px; height: 9px; background: var(--red-300); border: var(--outline-thin); border-top: 0; border-radius: 0 0 6px 6px; }
+.mon .avatar { width: 100%; height: auto; aspect-ratio: 1; font-size: 44px; }
+.mon .avatar img { width: 100%; height: 100%; object-fit: cover; }
+.mon .ear { position: absolute; top: -14px; width: 34px; height: 34px; border-radius: 50%; background: var(--surface); border: var(--outline-thin); }
+.mon .ear::after { content: ""; position: absolute; inset: 7px; border-radius: 50%; background: var(--red-300); }
+.mon .ear.l { left: -16px; } .mon .ear.r { right: -16px; }
+.badge-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.badge-ico { display: flex; flex-direction: column; align-items: center; width: 84px; text-align: center; font: 400 16px/1.1 var(--font-pixel); }
+.badge-ico svg { width: 44px; height: 44px; filter: drop-shadow(2px 2px 0 var(--shadow)); }

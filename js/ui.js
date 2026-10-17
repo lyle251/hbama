@@ -11,7 +11,7 @@ window.Trunk = window.Trunk || {};
 
   T.avatar = (uid, cls = '') => {
     const u = T.user(uid);
-    return `<span class="avatar ${cls}" title="${T.esc(u.name)}">${T.esc(T.initials(u.name))}</span>`;
+    return `<span class="avatar ${cls}" title="${T.esc(u.name)}">${u.photo ? `<img src="${u.photo}" alt="" style="width:100%;height:100%;object-fit:cover">` : T.esc(T.initials(u.name))}</span>`;
   };
   T.seg = (n, total = 10, warn = false) =>
     `<div class="seg ${warn ? 'warn' : ''}" role="img" aria-label="${n} of ${total}">${Array.from({ length: total }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div>`;
