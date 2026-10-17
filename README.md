@@ -68,7 +68,7 @@ The in-app map is a schematic with approximate positions, not to scale. Each pla
 ## Price check and product images
 
 - Opening a listing shows a **Price check**: this price against the average of other sellers with the same item (same material, ISBN or course item), plus the UA Supply Store and Amazon averages. The two retail numbers are **demo estimates** derived from list prices until the real sources are wired (`priceRef` adapter).
-- Product images: the seller's own photo comes first. Books fall back to the free Open Library cover for the ISBN. Other items show an item icon until a photo is uploaded. Amazon product images need the Product Advertising API and an Associates account (stubbed). Google and Amazon pages are not scraped.
+- Product images, tried in order: the seller's upload, a file at `img/products/<listing id>.jpg` (drop real photos there, e.g. `L02.jpg`), then the free Open Library cover for the ISBN. If none loads, a drawn example illustration (`js/art.js`) shows. Tutoring and ride listings have no product, so they have no picture. Amazon product images need the Product Advertising API and an Associates account (stubbed). Google and Amazon pages are not scraped.
 
 ## Privacy and safety design
 
@@ -76,7 +76,7 @@ The in-app map is a schematic with approximate positions, not to scale. Each pla
 - Positions are kept in memory only and dropped when the meetup ends or sharing stops. Nothing is written to storage.
 - Only the two parties and friends the user invites can see a position. Either person can stop at any time.
 - The student ID photo never leaves the browser in the demo. In production it goes to the verification provider and is not stored by Trunk.
-- Contact details in the Campus Hub are `TODO_VERIFY` placeholders and flagged "needs verification" until an admin confirms them. No phone numbers or URLs were invented.
+- The Campus Hub lists resource names and descriptions only. No phone numbers, URLs or hours are shown, because none have been confirmed.
 
 ## From mocks to real integrations
 

@@ -3,10 +3,10 @@ window.Trunk = window.Trunk || {};
 (function (T) {
   const INK = '#262626';
   const VARIANTS = {
-    ellie: { body: '#DADDE1', ear: '#B9BEC6', acc: '#4C7A2E', accKind: 'cap' },
+    ellie: { body: '#DADDE1', ear: '#B9BEC6', acc: '#4C7A2E', accKind: 'none' },
     rosie: { body: '#E5D2A5', ear: '#CDB57F', acc: '#3A6FB0', accKind: 'bandana' },
-    bigred: { body: '#7C9BD0', ear: '#5B7FBE', acc: '#FFFFFF', accKind: 'party' },
-    peanut: { body: '#F1F1F1', ear: '#CFCFCF', acc: '#E0A526', accKind: 'bow' },
+    bigred: { body: '#7C9BD0', ear: '#5B7FBE', acc: '#FFFFFF', accKind: 'none' },
+    peanut: { body: '#F1F1F1', ear: '#CFCFCF', acc: '#E0A526', accKind: 'none' },
   };
   const S = `stroke="${INK}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"`;
 

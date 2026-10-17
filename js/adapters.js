@@ -98,12 +98,15 @@ window.Trunk = window.Trunk || {};
     } },
     real: { lookup() { /* TODO: server route that queries both sources by ISBN/UPC and caches for a day. */ return null; } },
   };
-  /* Product images. Uploaded photos come first. Books fall back to the free Open Library cover for the ISBN (no key).
+  /* Product images, tried in order: the seller's upload, a file at img/products/<listing id>.jpg, the free Open Library cover for the ISBN (no key). If none loads, the drawn illustration (js/art.js) shows.
      TODO: Amazon Product Advertising API images for non-book items once Associates keys exist. Scraping Google or Amazon pages is not used. */
-  const images = { url(l) {
-    if (l.photo) return l.photo;
+  const images = { urls(l) {
+    const out = [];
+    if (l.photo) out.push(l.photo);
+    out.push(`img/products/${l.id}.jpg`); // drop real photos here, named by listing id
     const isbn = (l.isbn || '').replace(/[^0-9Xx]/g, '');
-    return isbn.length >= 10 ? `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg?default=false` : null;
+    if (isbn.length >= 10) out.push(`https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg?default=false`);
+    return out;
   } };
 
   const verification = {

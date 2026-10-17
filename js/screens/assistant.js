@@ -15,7 +15,7 @@
         <div class="hint">Buy new: about $${c.newPrice}. Bookstore link: TODO_VERIFY</div>${sellers}</div>`;
     }
     if (c.kind === 'listing') return `<div class="acard"><div class="row between"><a href="#/listing/${c.id}" data-act="assistClose"><b>${T.esc(c.title)}</b></a><b>$${c.price}</b></div><div class="hint">${T.esc(c.seller)} · pickup at ${T.esc(c.spot)}</div><div class="row"><button class="btn btn--sm" data-act="assistMsg" data-id="${c.id}">Message seller</button></div></div>`;
-    if (c.kind === 'resource') return `<div class="acard"><b>${T.esc(c.name)}</b>${c.desc ? `<div class="hint">${T.esc(c.desc)}</div>` : ''}<div class="hint">Contact details: TODO_VERIFY</div><a class="btn btn--sm" href="#/hub/${encodeURIComponent(c.cat)}" data-act="assistClose" style="align-self:flex-start">Open in Campus Hub</a></div>`;
+    if (c.kind === 'resource') return `<div class="acard"><b>${T.esc(c.name)}</b>${c.desc ? `<div class="hint">${T.esc(c.desc)}</div>` : ''}<a class="btn btn--sm" href="#/hub/${encodeURIComponent(c.cat)}" data-act="assistClose" style="align-self:flex-start">Open in Campus Hub</a></div>`;
     return '';
   }
   function msgHTML(m) {

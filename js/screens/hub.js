@@ -12,10 +12,9 @@
     const rs = list();
     if (!rs.length) return `<div class="stack" style="align-items:center;padding:18px;text-align:center">${T.ellie({ pose: 'sign', size: 120 })}<b class="px" style="font-size:22px">Please check this</b><p>No resources match. Clear the filters.</p></div>`;
     return rs.map((r) => `<article class="panel stack sm" style="margin-bottom:10px"><div class="row between"><h3 class="px" style="font-size:22px">${T.esc(r.name)}</h3><button class="btn btn--sm" data-act="favRes" data-id="${r.id}" aria-pressed="${!!(T.state.favRes || {})[r.id]}" aria-label="Favorite ${T.esc(r.name)}">${(T.state.favRes || {})[r.id] ? '♥' : '♡'}</button></div>
-      <div class="row" style="gap:4px"><span class="chip chip--soft">${T.esc(r.cat)}</span>${openNow(r) ? '<span class="chip chip--ver">OPEN NOW</span>' : '<span class="chip">closed</span>'}${verified(r) ? '<span class="chip chip--ver">VERIFIED ✓</span>' : '<span class="chip chip--hold">⚠ needs verification</span>'}</div>
+      <div class="row" style="gap:4px"><span class="chip chip--soft">${T.esc(r.cat)}</span></div>
       <p>${T.esc(r.desc)}</p>
-      <dl class="kv"><dt>Website</dt><dd>${verified(r) ? T.esc(r.url) : 'TODO_VERIFY'}</dd><dt>Phone</dt><dd>${verified(r) ? T.esc(r.phone) : 'TODO_VERIFY'}</dd><dt>Hours</dt><dd class="num">Mon to Fri, ${r.hours[0]}:00 to ${r.hours[1]}:00 <span class="muted">(unconfirmed)</span></dd></dl>
-      ${T.state.admin ? `<div class="row"><button class="btn btn--sm" data-act="verifyRes" data-id="${r.id}">Admin: ${verified(r) ? 'unmark verified' : 'mark verified'}</button></div>` : ''}</article>`).join('');
+</article>`).join('');
   }
   function marketLink() {
     if (T.hub.cat !== 'Tutoring' && T.hub.cat !== 'Engineering') return '';
@@ -33,7 +32,7 @@
         menu: `<span class="px">Search</span><span class="grow"><label class="sr" for="hub-q">Search resources</label><input class="input" id="hub-q" type="search" placeholder="tutoring, writing, food…" value="${T.esc(T.hub.q)}" ></span><label class="check"><input type="checkbox" id="hub-fav" ${T.hub.fav ? 'checked' : ''}> Favorites</label><button class="btn btn--sm btn--primary" data-act="hubQuiz">Which resource do I need?</button>`,
         body: `<div style="padding:16px"><div class="hint" style="margin-bottom:8px">${T.esc(T.school(T.state.school).name)} · all official resources in one place. ${T.hub.cat ? '<a href="#/hub/all">Show all folders</a>' : ''}</div>
           <div class="row" style="gap:4px;align-items:flex-start;justify-content:flex-start">${folders}</div><div id="hub-list" style="margin-top:12px"></div></div>`,
-        status: `<span id="hub-count"></span><span>Contact info is TODO_VERIFY until an admin confirms it</span>`,
+        status: `<span id="hub-count"></span><span>Official campus resources</span>`,
       });
     },
     mount(el) {

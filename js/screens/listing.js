@@ -66,7 +66,7 @@
       ].filter(Boolean).join('');
       const fav = T.state.favorites[l.id];
       const body = `<div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
-        <div class="stack"><div class="file__thumb" style="aspect-ratio:4/3;box-shadow:var(--shadow-btn)">${T.glyph(l.cat)}${T.coverImg(l)}<span class="file__fold"></span>${l.status === 'SOLD' ? '<span class="stamp slam">SOLD</span>' : ''}</div></div>
+        <div class="stack"><div class="file__thumb" style="aspect-ratio:4/3;box-shadow:var(--shadow-btn)">${T.thumbArt(l)}${T.coverImg(l)}<span class="file__fold"></span>${l.status === 'SOLD' ? '<span class="stamp slam">SOLD</span>' : ''}</div></div>
         <div class="stack">
           <div class="row between"><h1 style="font-size:30px">${T.esc(l.title)}</h1></div>
           <div class="row"><b class="px" style="font-size:34px;color:var(--brand-700)">${T.money(l.price)}</b>${T.chip(l.status)}<span class="chip chip--soft">${l.cond}</span>${l.cross ? '<span class="chip">Ships or meets halfway</span>' : ''}</div>
