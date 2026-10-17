@@ -1,10 +1,15 @@
 /* Home desktop and My Semester Kit */
 (function (T) {
   const myCourses = () => (T.state.synced ? (T.state.myCourses || T.REGISTERED) : []);
-  const matsOf = (code) => {
+  /** Materials for a course: from an uploaded syllabus when there is one, otherwise the seeded catalog. */
+  const matsOf = T.matsOf = (code) => {
+    const syl = (T.state.syllabi || {})[code];
+    if (syl) return syl.items.map((m) => ({ ...m }));
     const c = T.course(code);
-    return [...(c ? c.mats.map((m) => ({ ...m })) : []), ...((T.state.extraMats || {})[code] || [])];
+    return c ? c.mats.map((m) => ({ ...m })) : [];
   };
+  T.courseName = (code) => { const syl = (T.state.syllabi || {})[code], c = T.course(code); return (syl && syl.name) || (c && c.name) || 'Uploaded syllabus'; };
+  const priced = (m) => typeof m.newPrice === 'number' && m.newPrice > 0;
   const active = () => T.state.listings.filter((l) => l.school === T.state.school && (l.status === 'AVAILABLE' || l.status === 'NEGOTIATING'));
   /** Rank: exact ISBN/edition, then same course, then related type, then distance to the usual campus area. */
   T.recs = function (m, code) {
@@ -50,6 +55,41 @@
     T.go('kit');
   };
 
+
+  /* Map syllabus items to catalog materials (same ISBN, or the same words) so sellers and prices line up. */
+  const toks = (t) => t.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 3);
+  function mapItems(code, items) {
+    const seed = (T.course(code) || { mats: [] }).mats;
+    return items.map((it, i) => {
+      const hit = seed.find((m) => (it.isbn && m.isbn === it.isbn) || (toks(m.name).filter((w) => toks(it.name).includes(w)).length >= 2));
+      return { ...it, key: hit ? hit.key : `u-${code.replace(' ', '')}-${i}`, newPrice: hit ? hit.newPrice : undefined, edition: hit ? hit.edition : undefined, matched: !!hit, src: 'uploaded' };
+    });
+  }
+  function previewSyllabus(r, fileName) {
+    const code = r.code, items = mapItems(code || 'UPLOAD', r.items);
+    if (!code || !items.length) {
+      return T.dialog({ title: 'Add a syllabus', kind: 'error', body: `<b class="px" style="font-size:21px">I could not find required materials.</b><span>${code ? '' : 'No course code was found. '}Try pasting the "Required Texts" or "Other Course Materials" section.</span>`, buttons: [{ label: 'Try again', cls: 'btn--primary', run: () => { setTimeout(() => T.acts.addSyllabus(), 0); } }, { label: 'Close' }] });
+    }
+    const rows = items.map((it, i) => {
+      const ex = it.matched ? T.recs(it, code).filter((x) => x.rank === 0) : [], low = ex.length ? Math.min(...ex.map((x) => x.l.price)) : null;
+      return `<label class="check panel" style="align-items:flex-start;padding:8px 10px"><input type="checkbox" data-i="${i}" checked><span><b>${T.esc(it.name)}</b><br>
+        <span class="hint">${T.MAT_TYPES[it.type]}${it.isbn ? ' · ISBN ' + it.isbn : ''}${it.digital ? ' · eBook' : ''}${it.optional ? ' · recommended' : ''}${it.store ? ' · buy at ' + T.esc(it.store) : ''}</span><br>
+        <span class="hint">${ex.length ? `${ex.length} seller${ex.length > 1 ? 's' : ''} on campus, lowest $${low}` : 'No sellers on campus yet'}</span></span></label>`;
+    }).join('');
+    T.dialog({ title: 'Add a syllabus', body: `<b class="px" style="font-size:21px">${T.esc(code)} · ${T.esc(r.name || 'Course')}</b>
+      <span class="hint">${T.esc([r.term, r.section && 'Section ' + r.section, r.instructor, r.credits && r.credits + ' credits'].filter(Boolean).join(' · '))}<br>Read from ${T.esc(fileName)}</span>
+      <div class="stack sm"><b>Found ${items.length} item${items.length > 1 ? 's' : ''}</b>${rows}</div>
+      ${r.notes.length ? `<div class="stack sm"><b>Also noted</b>${r.notes.map((n) => `<span class="hint">• ${T.esc(n)}</span>`).join('')}</div>` : ''}`,
+      buttons: [{ label: 'Add to my Semester Kit', cls: 'btn--primary', run: (o) => {
+        const keep = T.$$('input[data-i]:checked', o).map((x) => items[Number(x.dataset.i)]);
+        if (!keep.length) { T.toast('Tick at least one item.'); return false; }
+        const st = T.state; st.syllabi = st.syllabi || {};
+        st.syllabi[code] = { code, name: r.name, term: r.term, section: r.section, instructor: r.instructor, credits: r.credits, notes: r.notes, fileName, items: keep };
+        st.myCourses = st.myCourses || (st.synced ? T.REGISTERED.slice() : []); if (!st.myCourses.includes(code)) st.myCourses.push(code);
+        st.synced = true; T.save(); T.toast(`Added ${keep.length} item${keep.length > 1 ? 's' : ''} for ${code}.`); T.go('kit'); T.render();
+      } }, { label: 'Cancel' }] });
+  }
+
   T.screens.kit = {
     render() {
       const s = T.state;
@@ -58,21 +98,23 @@
       }
       let newTotal = 0, trunkTotal = 0, haveCount = 0, items = 0;
       const sections = myCourses().map((code) => {
-        const c = T.course(code), mats = matsOf(code);
+        const syl = (s.syllabi || {})[code], mats = matsOf(code);
         const rows = mats.map((m) => {
           const have = !!s.have[m.key], ex = exact(m, code), low = ex.length ? Math.min(...ex.map((r) => r.l.price)) : null;
           items++; if (have) haveCount++;
-          if (!have) { newTotal += m.newPrice; trunkTotal += low !== null ? low : m.newPrice; }
+          if (!have && priced(m)) { newTotal += m.newPrice; trunkTotal += low !== null ? low : m.newPrice; }
           const recs = T.recs(m, code).slice(0, 3);
           return `<div class="kit-item ${have ? 'have' : ''}">
             <input type="checkbox" id="h-${m.key}" data-act="kitHave" data-key="${m.key}" ${have ? 'checked' : ''} aria-label="Already have ${T.esc(m.name)}">
             <div style="min-width:0"><label for="h-${m.key}" class="nm"><b>${T.esc(m.name)}</b></label>
-              <div class="row" style="gap:4px;margin:2px 0"><span class="chip chip--soft">${T.MAT_TYPES[m.type]}</span><span class="chip">${m.src === 'registrar' ? 'from registrar' : 'from syllabus'}</span>${m.edition ? `<span class="chip">${T.esc(m.edition)} ed.</span>` : ''}${m.isbn ? `<span class="chip num">ISBN ${m.isbn}</span>` : ''}</div>
-              <div>${ex.length ? `<b>${ex.length} seller${ex.length > 1 ? 's' : ''} on campus, lowest $${low}</b> <span class="muted">· new $${m.newPrice}</span>` : `<span class="muted">No sellers yet · new $${m.newPrice}</span>`}</div>
+              <div class="row" style="gap:4px;margin:2px 0"><span class="chip chip--soft">${T.MAT_TYPES[m.type]}</span><span class="chip">${m.src === 'registrar' ? 'from registrar' : syl ? 'from your syllabus' : 'from syllabus'}</span>${m.digital ? '<span class="chip chip--hold">eBook</span>' : ''}${m.optional ? '<span class="chip chip--soft">Recommended</span>' : ''}${m.edition ? `<span class="chip">${T.esc(m.edition)} ed.</span>` : ''}${m.isbn ? `<span class="chip num">ISBN ${m.isbn}</span>` : ''}</div>
+              <div>${ex.length ? `<b>${ex.length} seller${ex.length > 1 ? 's' : ''} on campus, lowest $${low}</b> <span class="muted">${priced(m) ? '· new $' + m.newPrice : ''}</span>` : `<span class="muted">No sellers yet${priced(m) ? ' · new $' + m.newPrice : ' · price not in the syllabus'}</span>`}</div>
+              ${m.store ? `<div class="hint">Syllabus says to buy at the ${T.esc(m.store)}.</div>` : ''}${m.digital ? '<div class="hint">The syllabus lists the eBook. Print copies of the same book can still help.</div>' : ''}
               ${!have && recs.length ? `<details><summary class="px" style="cursor:pointer;font-size:18px">Best matches</summary>${recs.map((r) => `<div><a href="#/listing/${r.l.id}">${T.esc(r.l.title)}</a> <span class="muted">$${r.l.price} · pickup at ${T.spot(r.l.spot).name} · ${['exact match', 'same course', 'related'][r.rank]}</span></div>`).join('')}</details>` : ''}</div>
             <div class="stack sm">${have ? '' : `<button class="btn btn--sm" data-act="kitWanted" data-key="${m.key}" data-code="${code}">Post a Wanted request</button>`}</div></div>`;
         }).join('');
-        return `<details class="kit-course" open><summary><span>${code} · ${T.esc(c ? c.name : 'Uploaded syllabus')}</span><span class="chip chip--soft">${mats.length} items</span></summary>${rows}
+        return `<details class="kit-course" open><summary><span>${code} · ${T.esc(T.courseName(code))}</span><span class="chip chip--soft">${mats.length} items</span></summary>${rows}
+          ${syl ? `<div style="padding:10px 16px;border-top:2px solid var(--panel-lo)"><div class="hint"><b>From ${T.esc(syl.fileName || 'your syllabus')}</b>: ${T.esc([syl.term, syl.instructor, syl.credits && syl.credits + ' credits'].filter(Boolean).join(' · '))}</div>${syl.notes.map((n) => `<div class="hint">• ${T.esc(n)}</div>`).join('')}</div>` : ''}
           <div class="row between" style="padding:8px 12px;border-top:1px solid var(--line)"><span class="hint">Need help with ${code}? ${/^(ECE|CS)\b/.test(code) ? '<a href="#/hub/Engineering"><b>Engineering tutoring</b></a>' : '<a href="#/hub/Tutoring"><b>Tutoring</b></a>'}</span><button class="btn btn--sm" data-act="reverseSell" data-code="${code}">Done with ${code}? Sell it</button></div></details>`;
       }).join('');
       const save = Math.max(0, newTotal - trunkTotal);
@@ -93,20 +135,29 @@
     reverseSell: (el) => {
       const code = el.dataset.code, c = T.course(code);
       T.dialog({ title: 'Done', body: `<b class="px" style="font-size:21px">Sell your ${code} materials to the ${c ? c.next : 100} students taking it next term?</b><span>We pre-fill a listing for your textbook. You set the price.</span>`,
-        buttons: [{ label: 'Pre-fill listing', cls: 'btn--primary', run: () => { const m = matsOf(code)[0]; T.sellDraft = { cat: 'CLASS', course: code, mat: m.key, title: m.name + (m.edition ? ', ' + m.edition + ' ed.' : ''), isbn: m.isbn || '', price: Math.round(m.newPrice * 0.45) }; T.go('sell'); } }, { label: 'Not now' }] });
+        buttons: [{ label: 'Pre-fill listing', cls: 'btn--primary', run: () => { const m = matsOf(code)[0]; T.sellDraft = { cat: 'CLASS', course: code, mat: m.key, title: m.name + (m.edition ? ', ' + m.edition + ' ed.' : ''), isbn: m.isbn || '', price: Math.round((m.newPrice || 40) * 0.45) }; T.go('sell'); } }, { label: 'Not now' }] });
     },
     addSyllabus: () => {
-      T.dialog({ title: 'Add a syllabus', body: `<b class="px" style="font-size:21px">Add a syllabus</b><span class="hint">Paste the text. PDF upload goes through the same parser on the server.</span>
-        <label class="field"><span class="px">Syllabus text</span><textarea class="input" id="syl" placeholder="ECE 380 Signals and Systems&#10;Required text: Signals and Systems Primer, ISBN 978-0-00-000380-3&#10;Calculator: scientific"></textarea></label>`,
-        buttons: [{ label: 'Extract items', cls: 'btn--primary', run: (ov) => {
-          const text = T.$('#syl', ov).value; if (!text.trim()) return false;
-          T.adapters.ai.parseSyllabus(text).then((r) => {
-            const st = T.state; st.extraMats = st.extraMats || {};
-            if (!T.course(r.course)) { st.extraMats[r.course] = r.items; } else { st.myCourses = st.myCourses || T.REGISTERED.slice(); }
-            if (!(st.myCourses || []).includes(r.course)) (st.myCourses = st.myCourses || []).push(r.course);
-            st.synced = true; T.save(); T.toast(`Found ${r.items.length} items for ${r.course} (from syllabus).`); T.render();
-          });
+      const ov = T.dialog({ title: 'Add a syllabus', body: `<b class="px" style="font-size:21px">Add a syllabus</b>
+        <span class="hint">Upload the PDF. It is read in your browser and nothing is sent anywhere. You can also paste the text.</span>
+        <label class="field"><span class="px">Syllabus file (PDF or text)</span><input class="input" id="syl-file" type="file" accept=".pdf,.txt,.md,application/pdf,text/plain"></label>
+        <label class="field"><span class="px">Or paste the text</span><textarea class="input" id="syl" placeholder="Paste the Required Texts and Other Course Materials sections"></textarea></label>
+        <div class="hint" id="syl-status" role="status"></div>`,
+        buttons: [{ label: 'Read syllabus', cls: 'btn--primary', run: (o) => {
+          const file = T.$('#syl-file', o).files[0], pasted = T.$('#syl', o).value, st = T.$('#syl-status', o);
+          if (!file && !pasted.trim()) { st.textContent = 'Choose a file or paste some text first.'; return false; }
+          st.textContent = file ? `Reading ${file.name}…` : 'Reading…';
+          (async () => {
+            try {
+              const text = file ? await T.fileToText(file) : pasted;
+              if (!text.trim()) throw new Error('No readable text found. If this is a scanned PDF, paste the text instead.');
+              const parsed = await T.adapters.ai.parseSyllabus(text);
+              o.close(); previewSyllabus(parsed, file ? file.name : 'pasted text');
+            } catch (e) { st.textContent = e.message || 'Could not read that file.'; }
+          })();
+          return false;
         } }, { label: 'Cancel' }] });
+      return ov;
     },
   });
 })(window.Trunk);

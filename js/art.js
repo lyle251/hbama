@@ -21,6 +21,7 @@ window.Trunk = window.Trunk || {};
         <rect x="66" y="100" width="80" height="22" fill="${shade(c, 1.25)}" ${o}/><text x="106" y="116" text-anchor="middle" font-family="Jersey 15, monospace" font-size="14" fill="#fff">${T.esc(l.course || 'TEXTBOOK')}</text>`; },
     manual: (l) => { const c = COURSE[l.course] || '#6B6B6B';
       return `<rect x="62" y="14" width="80" height="120" fill="${c}" ${o}/><rect x="72" y="30" width="60" height="50" fill="#F1F1F1" ${o}/><path d="M80 44 H124 M80 54 H124 M80 64 H110" ${o}/>${[24, 44, 64, 84, 104].map((y) => `<circle cx="62" cy="${y}" r="5" fill="#C6C6C6" ${o}/>`).join('')}<text x="102" y="112" text-anchor="middle" font-family="Jersey 15, monospace" font-size="15" fill="#fff">LAB</text>`; },
+    breadboard: () => `<rect x="24" y="30" width="152" height="92" rx="5" fill="#F1F1F1" ${o}/><path d="M34 76 H166" stroke="#BDBDBD" stroke-width="6"/>${[0,1,2,3,4,5,6,7,8,9,10,11,12,13].map((i) => `<circle cx="${40 + i * 9}" cy="52" r="2" fill="${K}"/><circle cx="${40 + i * 9}" cy="62" r="2" fill="${K}"/><circle cx="${40 + i * 9}" cy="92" r="2" fill="${K}"/><circle cx="${40 + i * 9}" cy="102" r="2" fill="${K}"/>`).join('')}<path d="M49 52 Q70 20 94 52" fill="none" stroke="#C07A2C" stroke-width="4"/><path d="M112 92 Q130 120 148 102" fill="none" stroke="#3A5FA0" stroke-width="4"/><rect x="84" y="56" width="34" height="14" fill="#2E2E2E" ${o.replace('3','2')}/><circle cx="150" cy="52" r="6" fill="#E0A526" ${o.replace('3','2')}/>`,
     notebook: () => `<rect x="56" y="14" width="92" height="122" fill="#2F2F2F" ${o}/><rect x="64" y="14" width="6" height="122" fill="#555" /><rect x="84" y="34" width="52" height="34" fill="#E4E4E4" ${o}/><path d="M92 46 H128 M92 56 H120" ${o}/>`,
     card: () => `<rect x="36" y="32" width="128" height="84" rx="6" fill="#3A7D44" ${o}/><rect x="52" y="48" width="96" height="26" fill="#BDBDBD" ${o}/><path d="M60 61 H140" stroke="#888" stroke-width="3"/><text x="100" y="102" text-anchor="middle" font-family="Jersey 15, monospace" font-size="16" fill="#fff">ACCESS CODE</text>`,
     calc: () => `<rect x="62" y="10" width="76" height="130" rx="6" fill="#3B3B3B" ${o}/><rect x="70" y="18" width="60" height="26" fill="#BFD8A0" ${o}/>${[0, 1, 2, 3].map((r) => [0, 1, 2, 3].map((c) => `<rect x="${71 + c * 15}" y="${54 + r * 20}" width="12" height="14" fill="${c === 3 ? '#C07A2C' : '#9A9A9A'}" ${o.replace('3', '2')}/>`).join('')).join('')}`,
@@ -47,6 +48,7 @@ window.Trunk = window.Trunk || {};
     if (l.cat === 'TUTOR' || l.cat === 'RIDE') return null;
     const m = l.mat || '', t = l.title.toLowerCase();
     if (/-text$/.test(m) || /-reader$/.test(m)) return 'book';
+    if (m === 'ece380-lab') return 'breadboard';
     if (/-lab$/.test(m)) return m === 'ch101-lab' ? 'notebook' : 'manual';
     if (m === 'math125-calc') return 'graphing';
     if (/-calc$/.test(m) || /calculator/.test(t)) return /graphing/.test(t) ? 'graphing' : 'calc';

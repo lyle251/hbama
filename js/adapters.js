@@ -15,20 +15,7 @@ window.Trunk = window.Trunk || {};
   /* Syllabus parsing. Real: call the Claude API (model claude-sonnet-5-5) server-side with the syllabus text and ask for JSON. */
   const ai = {
     mock: {
-      async parseSyllabus(text) {
-        await wait(700);
-        const found = T.COURSES.filter((c) => new RegExp(c.code.replace(' ', '\\s?'), 'i').test(text));
-        if (found.length) return { course: found[0].code, items: found[0].mats.map((m) => ({ ...m, src: 'syllabus' })) };
-        const items = [];
-        text.split(/\n+/).forEach((line, i) => {
-          const isbn = /ISBN[:\s#-]*([0-9][0-9-]{9,16})/i.exec(line);
-          if (isbn || /required (text|book)/i.test(line) || /calculator|goggles|lab coat|access code/i.test(line)) {
-            const type = /calculator/i.test(line) ? 'calc' : /goggles|coat/i.test(line) ? 'safety' : /access/i.test(line) ? 'access' : 'textbook';
-            items.push({ key: 'x' + i + Date.now(), type, name: line.replace(/^[\s•*-]+/, '').slice(0, 80), isbn: isbn ? isbn[1] : '', src: 'syllabus', newPrice: type === 'calc' ? 25 : type === 'safety' ? 12 : 90 });
-          }
-        });
-        return { course: (/\b([A-Z]{2,4})\s?(\d{3})\b/.exec(text) || [])[0] || 'Uploaded course', items };
-      },
+      async parseSyllabus(text) { await wait(600); return T.parseSyllabus(text); },
     },
     real: { async parseSyllabus() {
       // TODO: POST to /api/ai/syllabus; server calls Anthropic with ANTHROPIC_API_KEY, validates the JSON with Zod.
@@ -66,12 +53,12 @@ window.Trunk = window.Trunk || {};
     if (codes.length) {
       const cards = []; let total = 0, saveTo = 0, lines = [];
       codes.forEach((code) => {
-        const c = T.course(code);
-        c.mats.forEach((m) => {
-          const sellers = sellersFor(m, code); total += m.newPrice; saveTo += sellers.length ? sellers[0].price : m.newPrice;
-          cards.push({ kind: 'material', course: code, name: m.name, type: T.MAT_TYPES[m.type], edition: m.edition || '', isbn: m.isbn || '', newPrice: m.newPrice, src: m.src, sellers });
+        const mats = T.matsOf(code);
+        mats.forEach((m) => {
+          const sellers = sellersFor(m, code); if (m.newPrice) { total += m.newPrice; saveTo += sellers.length ? sellers[0].price : m.newPrice; }
+          cards.push({ kind: 'material', course: code, name: m.name, type: T.MAT_TYPES[m.type], edition: m.edition || '', isbn: m.isbn || '', newPrice: m.newPrice || 0, src: m.src, sellers });
         });
-        lines.push(`${code} (${c.name}) needs ${c.mats.length} things`);
+        lines.push(`${code} (${T.courseName(code)}) needs ${mats.length} thing${mats.length === 1 ? '' : 's'}`);
       });
       const hub = lc.match(/tutor|help|study/) ? [{ kind: 'resource', name: 'Engineering tutoring and lab help', cat: 'Engineering' }] : [];
       return { text: `${lines.join('. ')}. Buying new costs about $${total}. Buying from students on campus can cost about $${saveTo}, so you could save about $${Math.max(0, total - saveTo)}. Here is each item with the sellers on your campus.`, cards: [...cards, ...hub], chips: ['Who sells the cheapest calculator?', 'Where can I get tutoring?'] };

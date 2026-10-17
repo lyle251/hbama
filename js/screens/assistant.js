@@ -12,7 +12,7 @@
         : `<div class="hint">No sellers on campus yet.</div><button class="btn btn--sm" data-act="assistWanted" data-name="${T.esc(c.name)}" data-course="${c.course}">Post a Wanted request</button>`;
       return `<div class="acard"><div class="row between"><b>${T.esc(c.name)}</b><span class="chip chip--soft">${c.course}</span></div>
         <div class="row" style="gap:4px"><span class="chip chip--soft">${T.esc(c.type)}</span>${c.edition ? `<span class="chip chip--soft">${T.esc(c.edition)} ed.</span>` : ''}${c.isbn ? `<span class="chip chip--soft num">ISBN ${c.isbn}</span>` : ''}<span class="chip">${c.src === 'registrar' ? 'from registrar' : 'from syllabus'}</span></div>
-        <div class="hint">Buy new: about $${c.newPrice}. Bookstore link: TODO_VERIFY</div>${sellers}</div>`;
+        <div class="hint">${c.newPrice ? 'Buy new: about $' + c.newPrice + '.' : 'New price not in the syllabus.'} Bookstore link: TODO_VERIFY</div>${sellers}</div>`;
     }
     if (c.kind === 'listing') return `<div class="acard"><div class="row between"><a href="#/listing/${c.id}" data-act="assistClose"><b>${T.esc(c.title)}</b></a><b>$${c.price}</b></div><div class="hint">${T.esc(c.seller)} · pickup at ${T.esc(c.spot)}</div><div class="row"><button class="btn btn--sm" data-act="assistMsg" data-id="${c.id}">Message seller</button></div></div>`;
     if (c.kind === 'resource') return `<div class="acard"><b>${T.esc(c.name)}</b>${c.desc ? `<div class="hint">${T.esc(c.desc)}</div>` : ''}<a class="btn btn--sm" href="#/hub/${encodeURIComponent(c.cat)}" data-act="assistClose" style="align-self:flex-start">Open in Campus Hub</a></div>`;

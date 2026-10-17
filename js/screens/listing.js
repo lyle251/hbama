@@ -22,11 +22,11 @@
     const { sim, avg, ref } = T.priceCheck(l);
     const rows = [['This listing', l.price, 'ok']];
     if (avg !== null) rows.push([`Other sellers avg (${sim.length})`, avg, '']);
-    if (ref) rows.push(['UA Supply Store avg*', ref.supply, 'warn'], ['Amazon avg*', ref.amazon, 'warn']);
+    if (ref) rows.push(['UA Supe Store avg*', ref.supply, 'warn'], ['Amazon avg*', ref.amazon, 'warn']);
     const max = Math.max(...rows.map((r) => r[1]), 1);
     let verdict = '';
     if (avg !== null) { const d = l.price - avg; verdict = d <= -3 ? `<span class="chip chip--ver">$${-d} below other sellers</span>` : d >= 3 ? `<span class="chip chip--hold">$${d} above other sellers</span>` : '<span class="chip chip--soft">In line with other sellers</span>'; }
-    const save = ref && ref.supply > l.price ? `<b style="color:var(--ok)">Save $${ref.supply - l.price} vs the Supply Store (${Math.round((1 - l.price / ref.supply) * 100)}% off).</b>` : '';
+    const save = ref && ref.supply > l.price ? `<b style="color:var(--ok)">Save $${ref.supply - l.price} vs the Supe Store (${Math.round((1 - l.price / ref.supply) * 100)}% off).</b>` : '';
     const list = sim.length ? `<div style="overflow-x:auto"><table class="table"><tr><th>Seller</th><th>Item</th><th>Price</th><th>vs this</th></tr>${sim.slice(0, 5).map((x) => { const d = x.price - l.price; return `<tr><td>${T.esc(T.user(x.seller).name.split(' ')[0])}</td><td><a href="#/listing/${x.id}">${T.esc(x.title.slice(0, 34))}</a><div class="hint">${x.school === T.state.school ? T.spot(x.spot).name : T.school(x.school).short + ' (other campus)'}</div></td><td class="num">$${x.price}</td><td class="num ${d > 0 ? 'delta-up' : d < 0 ? 'delta-down' : ''}">${d === 0 ? 'same' : (d > 0 ? '+$' : '-$') + Math.abs(d)}</td></tr>`; }).join('')}</table></div>` : '<p class="hint">No other sellers have this exact item right now.</p>';
     return `<div class="panel stack sm" id="price-check"><div class="row between"><b class="px" style="font-size:20px">Price check</b>${verdict}</div>
       ${rows.map((r) => `<div class="meter-row" style="grid-template-columns:minmax(120px,170px) 1fr 64px"><span>${r[0]}</span>${T.seg(Math.max(1, Math.round(r[1] / max * 10)), 10, r[2])}<span class="num">$${r[1]}</span></div>`).join('')}

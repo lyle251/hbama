@@ -51,6 +51,12 @@ Open `http://localhost:8080`, then go to `#/demo` for the judging script (switch
 2. Enter name, slug, `.edu` domain, latitude, longitude and a color. Submit.
 3. The school appears on the US map and students with that email domain can sign up.
 
+## Syllabus upload
+
+In the Semester Kit, **Add a syllabus** takes a PDF (or text, or pasted text). The PDF is read in the browser with pdf.js (`js/vendor`, Apache-2.0), so the file never leaves the device. `js/syllabus.js` finds the course code and name, term, instructor, credits, the Required and Recommended Texts (with ISBNs), any kit named under Other Course Materials with the store to buy it from, and notes that affect what to bring (software platform, lab dress code). You review the items, then they join the course in your kit and are matched to sellers by ISBN or title words.
+
+Tested on the UA Simple Syllabus for ECE 380 (Digital Logic, Fall 2026): it finds the Brown eBook (ISBN 978-0-01-397866-2) and the Introduction to Digital Electronics Complete Kit. Prices are not in syllabi, so unmatched items show "price not in the syllabus". The parser is rule-based; the Claude adapter in `js/adapters.js` can replace it for other layouts.
+
 ## Pickup places
 
 Meetups happen at one of five public campus places. Addresses were checked against UA pages; the two marked "confirm" came from a secondary page or a conflicting listing, so check them before launch.
@@ -67,7 +73,7 @@ The in-app map is a schematic with approximate positions, not to scale. Each pla
 
 ## Price check and product images
 
-- Opening a listing shows a **Price check**: this price against the average of other sellers with the same item (same material, ISBN or course item), plus the UA Supply Store and Amazon averages. The two retail numbers are **demo estimates** derived from list prices until the real sources are wired (`priceRef` adapter).
+- Opening a listing shows a **Price check**: this price against the average of other sellers with the same item (same material, ISBN or course item), plus the UA Supe Store and Amazon averages. The two retail numbers are **demo estimates** derived from list prices until the real sources are wired (`priceRef` adapter).
 - Product images, tried in order: the seller's upload, a file at `img/products/<listing id>.jpg` (drop real photos there, e.g. `L02.jpg`), then the free Open Library cover for the ISBN. If none loads, a drawn example illustration (`js/art.js`) shows. Tutoring and ride listings have no product, so they have no picture. Amazon product images need the Product Advertising API and an Associates account (stubbed). Google and Amazon pages are not scraped.
 
 ## Privacy and safety design

@@ -35,10 +35,9 @@ window.Trunk = window.Trunk || {};
     { code: 'CS 100', name: 'Intro to Computing', dept: 'Computer Science', next: 140, mats: [
       { key: 'cs100-text', type: 'textbook', name: 'Intro to Computing: Concepts and Practice', edition: '5th', isbn: '978-0-00-000100-1', src: 'syllabus', newPrice: 118 },
       { key: 'cs100-code', type: 'access', name: 'Online practice platform access code', src: 'syllabus', newPrice: 45 } ] },
-    { code: 'ECE 380', name: 'Signals and Systems', dept: 'Electrical Engineering', next: 96, mats: [
-      { key: 'ece380-text', type: 'textbook', name: 'Signals and Systems Primer', edition: '3rd', isbn: '978-0-00-000380-3', src: 'syllabus', newPrice: 165 },
-      { key: 'ece380-calc', type: 'calc', name: 'Approved scientific calculator', src: 'registrar', newPrice: 24 },
-      { key: 'ece380-lab', type: 'lab', name: 'ECE 380 lab manual', edition: 'Fall', src: 'syllabus', newPrice: 32 } ] },
+    { code: 'ECE 380', name: 'Digital Logic', dept: 'Electrical and Computer Engineering', next: 96, mats: [
+      { key: 'ece380-text', type: 'textbook', name: 'Fundamentals of Digital Logic with VHDL Design (Brown), eBook', isbn: '978-0-01-397866-2', digital: true, src: 'syllabus', newPrice: 150 },
+      { key: 'ece380-lab', type: 'lab', name: 'Introduction to Digital Electronics Complete Kit', store: 'University Supestore', src: 'syllabus', newPrice: 60 } ] },
     { code: 'CH 101', name: 'General Chemistry', dept: 'Chemistry', next: 410, mats: [
       { key: 'ch101-text', type: 'textbook', name: 'General Chemistry: Atoms to Reactions', edition: '2nd', isbn: '978-0-00-000101-8', src: 'syllabus', newPrice: 140 },
       { key: 'ch101-goggles', type: 'safety', name: 'Splash safety goggles', src: 'registrar', newPrice: 9 },
@@ -82,11 +81,11 @@ window.Trunk = window.Trunk || {};
   });
   T.LISTINGS = [
     L('L01', 'CLASS', 'Intro to Computing: Concepts and Practice, 5th ed.', 62, 'Good', 'priya', 'gorgas', { course: 'CS 100', mat: 'cs100-text', isbn: '978-0-00-000100-1', desc: 'Light highlighting in chapters 1 to 4. Includes the practice problem insert.', cross: true }),
-    L('L02', 'CLASS', 'Signals and Systems Primer, 3rd ed.', 85, 'Good', 'tom', 'rodgers', { course: 'ECE 380', mat: 'ece380-text', isbn: '978-0-00-000380-3', desc: 'Clean copy, no missing pages. Solutions pamphlet included.', cross: true }),
-    L('L03', 'CLASS', 'Signals and Systems Primer, 3rd ed. (cheaper, worn)', 70, 'Fair', 'jamal', 'gorgas', { course: 'ECE 380', mat: 'ece380-text', isbn: '978-0-00-000380-3', desc: 'Cover is bent but every page is there.' }),
-    L('L04', 'CLASS', 'ECE 380 lab manual, Fall edition', 14, 'Good', 'tom', 'rodgers', { course: 'ECE 380', mat: 'ece380-lab', desc: 'Only the first lab is filled in.' }),
-    L('L05', 'CLASS', 'Scientific calculator (on the ECE 380 approved list)', 12, 'Good', 'keisha', 'student', { course: 'ECE 380', mat: 'ece380-calc', desc: 'Fresh batteries.' }),
-    L('L06', 'CLASS', 'Scientific calculator, works for ECE 380 and ST 260', 14, 'Like new', 'devon', 'gorgas', { course: 'ECE 380', mat: 'ece380-calc', desc: 'Used one semester. Case included.', status: 'NEGOTIATING' }),
+    L('L02', 'CLASS', 'Fundamentals of Digital Logic with VHDL Design (Brown), print copy', 85, 'Good', 'tom', 'rodgers', { course: 'ECE 380', mat: 'ece380-text', isbn: '978-0-01-397866-2', desc: 'Clean print copy of the course textbook, no missing pages.', cross: true }),
+    L('L03', 'CLASS', 'Fundamentals of Digital Logic with VHDL Design (Brown), worn copy', 70, 'Fair', 'jamal', 'gorgas', { course: 'ECE 380', mat: 'ece380-text', isbn: '978-0-01-397866-2', desc: 'Cover is bent but every page is there.' }),
+    L('L04', 'CLASS', 'Introduction to Digital Electronics Complete Kit (breadboard and parts)', 30, 'Good', 'tom', 'rodgers', { course: 'ECE 380', mat: 'ece380-lab', desc: 'Used one semester. Parts counted and bagged.' }),
+    L('L05', 'CLASS', 'Scientific calculator', 12, 'Good', 'keisha', 'student', { course: 'ST 260', mat: 'st260-calc', desc: 'Fresh batteries.' }),
+    L('L06', 'CLASS', 'Scientific calculator with case', 14, 'Like new', 'devon', 'gorgas', { course: 'ST 260', mat: 'st260-calc', desc: 'Used one semester. Case included.', status: 'NEGOTIATING' }),
     L('L07', 'CLASS', 'General Chemistry: Atoms to Reactions, 2nd ed.', 78, 'Good', 'keisha', 'rec', { course: 'CH 101', mat: 'ch101-text', isbn: '978-0-00-000101-8', desc: 'Access code not included.', cross: true }),
     L('L08', 'LAB', 'Splash safety goggles, clear', 5, 'Like new', 'keisha', 'rec', { course: 'CH 101', mat: 'ch101-goggles' }),
     L('L09', 'LAB', 'Lab coat, size M', 11, 'Good', 'priya', 'gorgas', { course: 'CH 101', mat: 'ch101-coat', desc: 'Washed twice. Fits 5\'8" to 5\'11".' }),
@@ -106,13 +105,13 @@ window.Trunk = window.Trunk || {};
     L('L23', 'LAB', 'Soldering iron kit with stand', 18, 'Good', 'tom', 'rodgers', { desc: 'Good for the ECE 380 lab and side projects.' }),
     L('L24', 'TICKET', 'Home game tickets, section 112, 2 seats', 70, 'New', 'keisha', 'student', { event: 'Home opener', date: 'Sat 6:30 PM', seat: 'Sec 112, Row 20' }),
     L('L25', 'TICKET', 'Spring concert floor pass', 35, 'New', 'devon', 'rec', { event: 'Spring concert', date: 'Fri 8:00 PM', seat: 'Floor' }),
-    L('L26', 'TUTOR', 'ECE 380 tutoring, 1 hour sessions', 20, 'New', 'tom', 'gorgas', { course: 'ECE 380', subject: 'Signals and Systems', rate: '$20/hr', avail: 'Weeknights after 6' }),
+    L('L26', 'TUTOR', 'ECE 380 tutoring (Digital Logic), 1 hour sessions', 20, 'New', 'tom', 'gorgas', { course: 'ECE 380', subject: 'Digital Logic', rate: '$20/hr', avail: 'Weeknights after 6' }),
     L('L27', 'TUTOR', 'CH 101 and BSC 114 study sessions', 18, 'New', 'priya', 'gorgas', { course: 'CH 101', subject: 'Chemistry, Biology', rate: '$18/hr', avail: 'Sun to Wed afternoons' }),
     L('L28', 'RIDE', 'Ride to Atlanta airport, Friday 2 PM', 25, 'New', 'devon', 'bruno', { from: 'Tuscaloosa', to: 'ATL airport', date: 'Fri 2:00 PM', seats: 3 }),
     L('L29', 'VEHICLE', '2011 hatchback, 118k miles', 3900, 'Good', 'keisha', 'bruno', { make: 'Hatchback', year: 2011, miles: 118000, desc: 'New tires, clean title. Test drive in a public lot.' }),
     L('L30', 'OTHER', 'Bike with lock, 21 speed', 75, 'Good', 'tom', 'rec'),
     /* Other campuses, visible through Browse other campuses. */
-    L('A01', 'CLASS', 'Signals and Systems Primer, 3rd ed.', 75, 'Good', 'auburn1', 'gorgas', { school: 'auburn', cross: true, course: 'ECE 380', mat: 'ece380-text', isbn: '978-0-00-000380-3' }),
+    L('A01', 'CLASS', 'Fundamentals of Digital Logic with VHDL Design (Brown), print copy', 75, 'Good', 'auburn1', 'gorgas', { school: 'auburn', cross: true, course: 'ECE 380', mat: 'ece380-text', isbn: '978-0-01-397866-2' }),
     L('A02', 'DORM', 'Compact air purifier', 30, 'Like new', 'auburn1', 'gorgas', { school: 'auburn', cross: true }),
     L('G01', 'CLASS', 'Intro to Computing: Concepts and Practice, 5th ed.', 55, 'Good', 'gt1', 'gorgas', { school: 'gt', cross: true, course: 'CS 100', mat: 'cs100-text', isbn: '978-0-00-000100-1' }),
     L('G02', 'LAB', 'Oscilloscope probes, pair', 22, 'Good', 'gt1', 'gorgas', { school: 'gt', cross: true }),
