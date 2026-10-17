@@ -178,8 +178,17 @@ window.Trunk = window.Trunk || {};
   };
   T.state = null;
   T.load = function () {
-    try { const raw = localStorage.getItem(KEY); if (raw) { T.state = JSON.parse(raw); return; } } catch (e) { /* storage unavailable */ }
+    try { const raw = localStorage.getItem(KEY); if (raw) { T.state = JSON.parse(raw); T.mergeTenants(); return; } } catch (e) { /* storage unavailable */ }
     T.state = T.freshState();
+  };
+  /* Tenants created from the admin page persist in state and join the registry at boot. */
+  T.mergeTenants = function () {
+    (T.state.extraSchools || []).forEach((x) => { if (!T.SCHOOLS.some((s) => s.slug === x.slug)) T.SCHOOLS.push(x); });
+  };
+  /* Subdomain routing: ua.trunk.app -> 'ua'. Path routing (#/market) covers local use. */
+  T.tenantFromHost = function (host) {
+    const m = /^([a-z0-9-]+)\.trunk\.app$/i.exec(host || '');
+    return m && T.SCHOOLS.some((s) => s.slug === m[1].toLowerCase()) ? m[1].toLowerCase() : null;
   };
   T.save = function () { try { localStorage.setItem(KEY, JSON.stringify(T.state)); } catch (e) { /* ignore */ } };
   T.reset = function () { T.state = T.freshState(); T.save(); };

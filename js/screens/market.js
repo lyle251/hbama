@@ -116,14 +116,14 @@
       const kids = k === 'CLASS' ? `<ul>${T.COURSES.map((c) => `<li><label class="check"><input type="checkbox" data-mk="course" value="${c.code}" ${m.courses.includes(c.code) ? 'checked' : ''}> ${c.code}</label></li>`).join('')}</ul>` : '';
       return `<li><label class="check"><span class="box" style="width:auto">${k === 'CLASS' ? '[–]' : '[+]'}</span><input type="checkbox" data-mk="cat" value="${k}" ${m.cats.includes(k) ? 'checked' : ''}> ${v} <span class="cnt muted">${cnt(k)}</span></label>${kids}</li>`;
     }).join('');
-    return `<ul class="tree" aria-label="Categories">${cats}</ul><hr style="border:0;border-top:2px dashed var(--ink-soft);margin:12px 0">
+    return `<details id="mk-filters" open><summary class="px" style="font-size:20px;cursor:pointer">Filters</summary><ul class="tree" aria-label="Categories">${cats}</ul><hr style="border:0;border-top:2px dashed var(--ink-soft);margin:12px 0">
       <div class="stack sm">
         <label class="field"><span class="px">Max price</span><input class="input" id="mk-max" type="number" min="0" placeholder="$ any" value="${m.max}"></label>
         <label class="field"><span class="px">Condition</span><select class="input" id="mk-cond"><option value="">Any</option>${T.CONDS.map((c) => `<option ${m.cond === c ? 'selected' : ''}>${c}</option>`).join('')}</select></label>
         <label class="field"><span class="px">Campus spot</span><select class="input" id="mk-spot"><option value="">Anywhere</option>${T.SPOTS.map((x) => `<option value="${x.id}" ${m.spot === x.id ? 'selected' : ''}>${x.name}</option>`).join('')}</select></label>
         <label class="check"><input type="checkbox" id="mk-ver" ${m.ver ? 'checked' : ''}> Verified sellers only</label>
         <label class="check"><input type="checkbox" id="mk-cross" ${m.cross ? 'checked' : ''}> Browse other campuses</label>
-      </div>`;
+      </div></details>`;
   }
 
   T.screens.market = {
@@ -137,6 +137,8 @@
     },
     mount(el) {
       T.mkUpdate();
+      if (innerWidth <= 760 && !T.mk.openFilters) T.$('#mk-filters', el).open = false;
+      T.$('#mk-filters', el).addEventListener('toggle', (e) => { if (innerWidth <= 760) T.mk.openFilters = e.target.open; });
       const q = T.$('#mk-q', el), sug = T.$('#mk-sug', el);
       q.addEventListener('input', () => {
         T.mk.q = q.value; T.mkUpdate();

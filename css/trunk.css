@@ -414,3 +414,7 @@ input[type=radio]:checked::after { content: ""; width: 8px; height: 8px; border-
 .badge-row { display: flex; gap: 12px; flex-wrap: wrap; }
 .badge-ico { display: flex; flex-direction: column; align-items: center; width: 84px; text-align: center; font: 400 16px/1.1 var(--font-pixel); }
 .badge-ico svg { width: 44px; height: 44px; filter: drop-shadow(2px 2px 0 var(--shadow)); }
+#mk-filters > summary { list-style: none; }
+#mk-filters > summary::-webkit-details-marker { display: none; }
+@media (min-width: 761px) { #mk-filters > summary { display: none; } }
+@media (max-width: 760px) { .menubar .grow { flex-basis: 100%; order: 9; } #mk-filters > summary::before { content: "[+] "; } #mk-filters[open] > summary::before { content: "[–] "; } }
